@@ -1,26 +1,763 @@
 @import "tailwindcss";
 
+/* ────────────────────────────────────────────────────────────────
+   Halden Roofing Co. — design tokens
+   Slate ink, Texas limestone, copper flashing, big-sky blue.
+   Sections switch palettes with .theme-ink / .theme-stone; components
+   only use the semantic tokens (bg, fg, muted, line, surface, accent).
+   The 6/12 roof pitch (26.565°) is the geometric motif everywhere.
+   ──────────────────────────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #0e1620;
+  --slate: #1c2a38;
+  --slate-2: #26374a;
+  --stone: #f2eee7;
+  --stone-2: #e8e2d7;
+  --stone-3: #dcd4c6;
+  --copper: #c4713c;
+  --copper-2: #d98a52;
+  --copper-deep: #9a4e22;
+  --sky: #a9c3d6;
+  --storm: #56687a;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --font-archivo: "Archivo Expanded", "Arial Black", Arial, sans-serif;
+  --gutter: clamp(1rem, 3.4vw, 3.25rem);
+  --header-h: 4.75rem;
+  /* tan(26.565°) — a true 6/12 roof pitch */
+  --pitch: 0.5;
+}
+
+.theme-ink {
+  --bg: var(--ink);
+  --fg: var(--stone);
+  --muted: color-mix(in oklab, var(--stone) 74%, var(--ink));
+  --faint: color-mix(in oklab, var(--stone) 64%, var(--ink));
+  --line: color-mix(in oklab, var(--stone) 14%, transparent);
+  --surface: var(--slate);
+  --surface-2: var(--slate-2);
+  --accent: var(--copper);
+  --accent-text: var(--copper-2);
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+.theme-stone {
+  --bg: var(--stone);
+  --fg: var(--ink);
+  --muted: color-mix(in oklab, var(--ink) 72%, var(--stone));
+  --faint: color-mix(in oklab, var(--ink) 64%, var(--stone));
+  --line: color-mix(in oklab, var(--ink) 14%, transparent);
+  --surface: var(--stone-2);
+  --surface-2: var(--stone-3);
+  --accent: var(--copper);
+  /* Darker copper for text on limestone (AA 4.5:1+). */
+  --accent-text: var(--copper-deep);
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+.theme-slate {
+  --bg: var(--slate);
+  --fg: var(--stone);
+  --muted: color-mix(in oklab, var(--stone) 76%, var(--slate));
+  --faint: color-mix(in oklab, var(--stone) 67%, var(--slate));
+  --line: color-mix(in oklab, var(--stone) 14%, transparent);
+  --surface: var(--slate-2);
+  --surface-2: color-mix(in oklab, var(--slate-2) 70%, var(--stone));
+  --accent: var(--copper);
+  --accent-text: var(--copper-2);
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--ink);
+  --color-slate: var(--slate);
+  --color-slate-2: var(--slate-2);
+  --color-stone: var(--stone);
+  --color-stone-2: var(--stone-2);
+  --color-stone-3: var(--stone-3);
+  --color-copper: var(--copper);
+  --color-copper-2: var(--copper-2);
+  --color-copper-deep: var(--copper-deep);
+  --color-sky: var(--sky);
+  --color-storm: var(--storm);
+
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --ease-out-expo: var(--ease-out-expo);
+  --ease-in-out-quart: var(--ease-in-out-quart);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─────────────────────────── base ─────────────────────────── */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  scroll-padding-top: calc(var(--header-h) + 1rem);
+  background: var(--ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--copper);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--copper);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.text-accent {
+  color: var(--accent-text);
+}
+
+/* ─────────────────────────── type ─────────────────────────── */
+
+@utility font-display {
+  font-family: var(--font-display);
+  font-stretch: 125%;
+  font-variation-settings: "wdth" 125;
+}
+
+@utility t-mega {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 125;
+  font-stretch: 125%;
+  font-size: clamp(2.6rem, 8.4vw, 10.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+@utility t-h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 125;
+  font-stretch: 125%;
+  font-size: clamp(2.3rem, 6.2vw, 7rem);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+@utility t-h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 125;
+  font-stretch: 125%;
+  font-size: clamp(1.9rem, 4.3vw, 4.6rem);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+@utility t-h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 112;
+  font-stretch: 112%;
+  font-size: clamp(1.3rem, 2vw, 1.9rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+@utility t-lead {
+  font-size: clamp(1.12rem, 1.45vw, 1.45rem);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+@utility t-body {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+@utility t-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@utility t-spec {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@utility wrap {
+  width: 100%;
+  max-width: 1680px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@utility hairline {
+  border-color: var(--line);
+}
+
+/* Outlined display text (footer wordmark, big numbers) */
+@utility text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--line);
+}
+
+/* ───────────────────── the roof-pitch motif ───────────────────── */
+
+/* Section whose top edge is a low gable (the roofline of the next section). */
+.gable-top {
+  --rise: clamp(28px, 5vw, 84px);
+  clip-path: polygon(0 var(--rise), 50% 0, 100% var(--rise), 100% 100%, 0 100%);
+  margin-top: calc(var(--rise) * -1);
+  padding-top: var(--rise);
+  position: relative;
+}
+
+/* Image frame with a true 6/12 gable top: peak rises half of the half-width. */
+.gable-frame {
+  clip-path: polygon(0 var(--g, 22%), 50% 0, 100% var(--g, 22%), 100% 100%, 0 100%);
+}
+
+/* Chevron bullet (roofline) */
+.chev {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.45em;
+  background: currentColor;
+  clip-path: polygon(0 100%, 50% 0, 100% 100%, 82% 100%, 50% 36%, 18% 100%);
+}
+
+/* Split-text line masks (GSAP SplitText mask: "lines") */
+.split-line {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+/* ─────────── first-paint intros (CSS-only, LCP-safe) ─────────── */
+
+@keyframes heading-in {
+  from {
+    clip-path: inset(0 0 42% 0);
+    transform: translateY(0.28em);
+  }
+  to {
+    clip-path: inset(-10% -2% -20% -2%);
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0.14;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.anim-heading {
+  animation: heading-in 1.3s var(--ease-out-expo) var(--d, 0s) both;
+}
+.anim-fade {
+  animation: fade-in 1.2s var(--ease-out-expo) calc(var(--d, 0s) + 0.1s) both;
+}
+
+/* Hero window: house-shaped mask that opens to full-bleed on scroll.
+   --p (0 → 1, scroll, set by JS) and --i (intro, CSS) drive the polygon. */
+@property --i {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@keyframes hero-window-in {
+  from {
+    --i: 1;
+  }
+  to {
+    --i: 0;
+  }
+}
+.hero-window {
+  --p: 0;
+  --inset: 25vw;
+  --eave: 47svh;
+  --k: calc((1 - var(--p)) * (1 + var(--i) * 0.55));
+  --x: calc(var(--inset) * var(--k));
+  --run: calc(50vw - var(--x));
+  --e: calc(var(--eave) * (1 - var(--p)) + var(--i) * 12svh);
+  clip-path: polygon(
+    var(--x) 100%,
+    var(--x) var(--e),
+    50% calc(var(--e) - var(--run) * var(--pitch) * (1 - var(--p))),
+    calc(100% - var(--x)) var(--e),
+    calc(100% - var(--x)) 100%
+  );
+  animation: hero-window-in 1.6s var(--ease-out-expo) 0.05s backwards;
+}
+@media (max-width: 767px) {
+  .hero-window {
+    --inset: 5vw;
+    --eave: 44svh;
+  }
+}
+
+/* ─────────────────────────── misc ─────────────────────────── */
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.marquee {
+  animation: marquee var(--dur, 40s) linear infinite;
+}
+.marquee-rev {
+  animation-direction: reverse;
+}
+.marquee-wrap:hover .marquee {
+  animation-play-state: paused;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+}
+.pulse-dot {
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-8%, 0, 0);
+  }
+  to {
+    transform: translate3d(8%, 0, 0);
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Rich text */
+.prose-halden {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--muted);
+}
+.prose-halden > * + * {
+  margin-top: 1.15em;
+}
+.prose-halden h2 {
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 112;
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 750;
+  margin-top: 2em;
+}
+.prose-halden ul {
+  list-style: none;
+  padding-left: 1.3em;
+}
+.prose-halden li {
+  position: relative;
+}
+.prose-halden li::before {
+  content: "";
+  position: absolute;
+  left: -1.3em;
+  top: 0.7em;
+  width: 0.7em;
+  height: 0.35em;
+  background: var(--accent);
+  clip-path: polygon(0 100%, 50% 0, 100% 100%, 82% 100%, 50% 36%, 18% 100%);
+}
+.prose-halden strong {
+  color: var(--fg);
+  font-weight: 700;
+}
+.prose-halden a {
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─────────────────────── view transitions ─────────────────────── */
+
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* New page rises into place through a gable-shaped wipe. */
+::view-transition-old(.page) {
+  animation: page-out 480ms var(--ease-in-out-quart) both;
+}
+::view-transition-new(.page) {
+  animation: page-in 950ms var(--ease-out-expo) 100ms both;
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-3vh) scale(0.985);
+  }
+}
+@keyframes page-in {
+  from {
+    clip-path: polygon(0 100%, 50% 100%, 100% 100%, 100% 100%, 0 100%);
+    transform: translateY(6vh);
+  }
+  60% {
+    clip-path: polygon(0 12%, 50% 0%, 100% 12%, 100% 100%, 0 100%);
+  }
+  to {
+    clip-path: polygon(0 0, 50% 0, 100% 0, 100% 100%, 0 100%);
+    transform: none;
+  }
+}
+
+::view-transition-group(.morph) {
+  animation-duration: 750ms;
+  animation-timing-function: var(--ease-out-expo);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: via-blur;
+}
+@keyframes via-blur {
+  30% {
+    filter: blur(4px);
+  }
+}
+
+/* ─────────────────────── reduced motion ─────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .marquee {
+    animation: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* ─────────────────────── logo + cursor ─────────────────────── */
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.mark-draw .mark-roof,
+.mark-draw .mark-h {
+  stroke-dasharray: 1;
+  animation: draw 1.4s var(--ease-in-out-quart) both;
+}
+.mark-draw .mark-h {
+  animation-delay: 0.35s;
+}
+
+.cursor {
+  transition: opacity 0.3s;
+}
+.cursor-inner {
+  position: relative;
+  transform: translate(-50%, -30%);
+}
+.cursor-chev {
+  width: 22px;
+  height: 13px;
+  display: block;
+  transition: transform 0.45s var(--ease-out-expo);
+}
+.cursor[data-hover="1"] .cursor-chev {
+  transform: translateY(-6px) scale(1.6);
+}
+.cursor-drag {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 6px) scale(0.6);
+  opacity: 0;
+  color: #f2eee7;
+  font-size: 0.62rem;
+  transition: opacity 0.3s, transform 0.45s var(--ease-out-expo);
+}
+.cursor[data-drag="1"] .cursor-drag {
+  opacity: 1;
+  transform: translate(-50%, 6px) scale(1);
+}
+
+/* ─────────────────────── house illustration ─────────────────────── */
+
+@keyframes course-in {
+  from {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.roof-course {
+  transform-box: fill-box;
+  animation: course-in 520ms var(--ease-out-expo) both;
+}
+
+@keyframes sweep-x {
+  from {
+    transform: translateX(-60px);
+  }
+  to {
+    transform: translateX(640px);
+  }
+}
+@keyframes scan-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(80px);
+  }
+}
+@keyframes flash {
+  0%,
+  80%,
+  100% {
+    opacity: 0;
+  }
+  84% {
+    opacity: 0.4;
+  }
+}
+@keyframes hit-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.55;
+  }
+}
+.hit {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hit-pulse 1.6s ease-in-out infinite;
+}
+
+/* ─────────────────────── map ─────────────────────── */
+
+@keyframes hail-march {
+  to {
+    stroke-dashoffset: -160;
+  }
+}
+.map-hail {
+  animation: hail-march 4s linear infinite;
+}
+@keyframes map-ping {
+  0% {
+    r: 30;
+    opacity: 0.9;
+  }
+  100% {
+    r: 240;
+    opacity: 0;
+  }
+}
+.map-ping {
+  animation: map-ping 3.2s var(--ease-out-expo) infinite;
+}
+
+/* ─────────────────────── accordion ─────────────────────── */
+
+:root {
+  interpolate-size: allow-keywords;
+}
+details.faq::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition: block-size 0.6s var(--ease-out-expo), content-visibility 0.6s allow-discrete;
+}
+details.faq[open]::details-content {
+  block-size: auto;
+}
+details.faq summary::-webkit-details-marker {
+  display: none;
+}
+details.faq summary {
+  list-style: none;
+}
+details.faq[open] .faq-icon {
+  transform: rotate(180deg);
+}
+
+/* Inner-page hero photo: gable top settles from steep to shallow. */
+@property --gy {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+@keyframes gable-settle {
+  from {
+    --gy: 42%;
+  }
+  to {
+    --gy: 9%;
+  }
+}
+.hero-gable {
+  --gy: 9%;
+  clip-path: polygon(0 var(--gy), 50% 0, 100% var(--gy), 100% 100%, 0 100%);
+  animation: gable-settle 1.6s var(--ease-out-expo) 0.15s backwards;
+}
+@media (max-width: 767px) {
+  .hero-gable {
+    --gy: 6%;
+  }
+}
+
+/* ─────────────────────── range sliders ─────────────────────── */
+
+input.range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 44px;
+  background: transparent;
+}
+input.range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, var(--copper) var(--v, 50%), var(--line) var(--v, 50%));
+}
+input.range::-moz-range-track {
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, var(--copper) var(--v, 50%), var(--line) var(--v, 50%));
+}
+input.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  margin-top: -12px;
+  border-radius: 50%;
+  background: var(--stone);
+  border: 6px solid var(--copper);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+input.range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--stone);
+  border: 6px solid var(--copper);
+}
+
+.success-roof {
+  stroke-dasharray: 1;
+  animation: draw 1.2s var(--ease-in-out-quart) 0.1s both;
 }

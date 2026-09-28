@@ -1,0 +1,96 @@
+crew-shingles-1|MyBBMM317A4|photo-1635424709845-3a85ad5e1f5e|Raze Solar|razesolar
+crew-shingles-2|eFOkg4ZMiBs|photo-1635424824800-692767998d07|Raze Solar|razesolar
+crew-nailer|ACnFSTBlnts|photo-1635424825057-7fb6dcd651ef|Raze Solar|razesolar
+crew-steep-roof|sKiCvM6sPtU|photo-1681049400158-0ff6249ac315|Immo Wegmann|tinkerman
+crew-metal-roll|J9jYy9S1zAk|photo-1623489254637-a2dd8375243d|Mads Eneqvist|madseneqvist
+trusses-golden|dSRhwPe6v9c|uploads/14123892966835548e7bd/14369636|D R|dkphotos22
+crew-gloves|fjWOxzYGSA8|photo-1667922578520-61558e79aa7e|Gabriel Alenius|gabrielalenius
+crew-ridge|d4j5hns6sj8|photo-1740825961434-e9287638592b|David Geneugelijk|davidgeneugelijk
+crew-drill|BqscJWwv6bw|photo-1755168648692-ef8937b7e63e|LXS Photography|lxsphotography
+crew-house|dRXYCE5eQpk|photo-1634750009079-6bf7bede038b|Compagnons|sigmund
+roofer-portrait|IQDWnu2xfRI|photo-1608806667067-66ebd8b169e8|Ricardo Gomez Angel|rgaleriacom
+roofer-back|pCH5-U4IBZU|photo-1628847115161-d6793dc59c7f|Baptiste Buisson|baptistebuiss
+roofer-clouds|6g2loqbmyP0|photo-1560005360-d794365f72e8|Lai Man Nung|kirklai
+roofer-hardhat|IiHDQ75iu80|photo-1614214060053-4af39830566b|Jon Tyson|jontyson
+ladder-sky|dDZ1JjQXmlY|photo-1635082627989-dcd12a107364|Nick Page|nickpage
+metal-edge|s7L1cF7kl8E|photo-1679382915249-489422f49eb3|J A C K|jackpm9
+metal-cupola|BWzbJF9Sclw|photo-1759105734106-47594c3eea11|Angelica Teran|angelicateranp
+metal-gable|zOhbMjmRx9o|photo-1602536742225-5d2e14055de5|Parsoa Khorsand|parsoakhorsand
+metal-seams|jBzPse1Sd7o|photo-1602193458517-db6caca8f1fe|Ryunosuke Kikuno|ryunosuke_kikuno
+metal-peak|TVri8_TLudA|photo-1602193289141-9605ad75d0a5|Ryunosuke Kikuno|ryunosuke_kikuno
+metal-twin-peaks|rxT2WDm-peU|photo-1602195335190-947dd2058cc4|Ryunosuke Kikuno|ryunosuke_kikuno
+metal-dormers|YldJ2NIz1Yo|photo-1779941373840-a93f6e0d5db0|Meg|megindoors
+metal-abstract|x5UifGqA5NE|photo-1755669933959-377ab117bb8a|Mike Hindle|mikehindle
+metal-black-gable|XvNROlYdtik|photo-1779384570168-cf04dc968a97|atelierbyvineeth|atelierbyvineeth
+ranch-metal-roof|UQBm9-Fj0nA|photo-1787672358119-25cb4c768d14|Divaris Shirichena|divaris
+house-metal-white|DknO0c-iouQ|photo-1664301814769-591e850b0f64|Roger Starnes Sr|rstar50
+tx-ranch-metal|6FvcNx2YgyE|photo-1758915576261-8da237f62126|Dennis Lamberth|drlamberth
+tx-ranch-porch|595z5mM1meY|photo-1758915717980-502e4f862b62|Dennis Lamberth|drlamberth
+tile-terracotta|MjLrM8rVMC0|photo-1528223871781-8f4c984f6164|Robin Joshua|robinjoshua4
+tile-barrel|Jii1bSg3Q_I|photo-1614418583513-8e96d9160333|Peter Muscutt|peterm4988372
+tile-dark|oR3GKFpy3dA|photo-1680035579849-3185807fb1ea|Willy the Wizard|willythewizard
+tile-dormers|Dg_vH-Biy9w|photo-1504241932178-447c4c934e98|Southeastern Premier Roofing|southeasternpremierroofing
+slate-dark|qbUYUbBubHo|photo-1567981231971-228a0e25ba82|Julia Craice|jcraice
+slate-grey|t7XtmgozucU|photo-1590384141345-417474f64538|josep plans|josepplans
+slate-fishscale|6ZaSS7e0T-4|photo-1548254689-2d7a62331d96|DDP|moino007
+shingle-sky|ZzZouwiQWV0|photo-1634853982486-c06f0e17940f|Luke Southern|lukesouthern
+shingle-dark|R6wTPAIWAIk|photo-1769985134083-8b9df05db881|Saifee Art|saifee_art
+shingle-grey|9u5r1XbtMJg|photo-1573876384005-dabc14a8ccbd|Hal Gatewood|halacious
+shingle-rows|3vb5_CYPuw4|photo-1588711812015-1e4bc3c4d27b|A. C.|3tnik
+shingle-architectural|NklJQ_Ut-0I|photo-1698402628921-619ab7819ac9|Rena Zol|renazol89
+aerial-house-grey|-uvuU43FAwQ|photo-1755114203680-d39d95efa82c|Paragon Exterior|paragonexterior
+aerial-houses-trees|yKRdX-kY8TE|photo-1506290690282-661fbd742be8|Tiago Rodrigues|tmrodrigues
+aerial-suburb|sPpe2D7VbpM|photo-1513880989635-6eb491ce7f5b|Maximillian Conacher|maxconacher
+aerial-dark-roofs|nzCl1r1k4G8|photo-1784767348409-2b530cfcb161|Cong Long Vu|vclong2003
+aerial-suburb-curve|CNV8ytt7WD8|photo-1765106893273-980e5bf89a7c|Ahnaf Tahsin|_ahnaf_rafi__
+aerial-texas|wTrP_Z4R4aU|photo-1604707134701-6712b5e30e12|Matthew Lancaster|matthewelancaster
+storm-supercell-road|cswvKS59E90|photo-1619819308849-3ab4ab8deca2|Raychel Sanner|raychelsnr
+storm-amber|dZzwRkos_oY|photo-1673990964789-99bfe6d1eed2|Peter Kovesi|stonery84
+storm-wheat|sNpuODrBwFs|photo-1687287652738-ddb44ed10ba0|Raychel Sanner|raychelsnr
+storm-pink|m-5pFjuxSBk|photo-1604980119065-05c984102c08|Raychel Sanner|raychelsnr
+storm-house|O31o9GodV2g|photo-1612886087778-4fde113e495a|Raychel Sanner|raychelsnr
+storm-road|B9ZMW98nnJs|photo-1506462549935-b85479a37448|Chaz McGregor|chazmcgregor
+storm-shelf|G-970jMBz_Y|photo-1781827690436-b1d807b7edb0|Roger Starnes Sr|rstar50
+storm-farmhouse|4cQYqfBjOUA|photo-1748701821466-0b9f8bf839ac|Steve Gribble|steve_g_
+hail-grass|obrHO1J128c|photo-1702863173903-a6faf669e11e|Champers Fu|champers5000
+hail-ground|wvbsS58PoNA|photo-1655059835527-181b0e732db2|David Trinks|dtrinksrph
+hail-hand|f6cVTolEhQE|photo-1606588347049-62bfd0c118d5|Pavel Neznanov|npi
+house-modern-farmhouse|kEjrQ8h9Bgc|photo-1662505899914-1000c566477b|Tyrone Sanders|tyronesand
+house-timber-porch|LUdiEvMAyQ8|photo-1779588000947-d1fe6adab784|Roger Starnes Sr|rstar50
+house-black|bk2UT5dodZE|photo-1773427457869-6fbded8b89b9|Roger Starnes Sr|rstar50
+house-long-drive|O_Zs64flulU|photo-1675275698293-09d50d7f224d|Roger Starnes Sr|rstar50
+house-ranch-dusk|ZdJ6eIKN3G0|photo-1608429835892-30be51ea4d6c|Cole Ankney|rcankney
+house-stone-ranch|WR9UUHT3ns8|photo-1675275724396-f16c10fced75|Roger Starnes Sr|rstar50
+house-brick-ranch|V9ny0PxUsmo|photo-1694105050266-911023811297|Roger Starnes Sr|rstar50
+house-black-dusk|UEhjiKh63Ek|photo-1724931420584-d360afc3e1f8|Clay Banks|claybanks
+house-stone-gable|LN2rq7GkHcQ|photo-1676696524614-aa88dbca3734|fruitfullmedia|fruitfullmedia
+house-white-classic|iAnpbETyLO0|photo-1782852634404-972610f87807|Roger Starnes Sr|rstar50
+house-pink-sky|vN01MT3NsDQ|photo-1590354893781-90ed27ce7ce9|Vidar Nordli-Mathisen|vidarnm
+gable-golden|JwLq2C5E9kE|photo-1612200167908-f55e26ada541|Caseen Kyle Registos|caseenkyle
+house-dusk-glow|AqGQtqKwlfw|photo-1516562618495-ad1ff1a273f9|Vidar Nordli-Mathisen|vidarnm
+house-brick-dusk|Un0pSz5t1fM|photo-1703699502638-7751c4acd044|Xiaoyu Huang|xiaoyu_huang
+house-lit-windows|yqozBsi5ioc|photo-1721149122657-7b5440f39160|Clay Banks|claybanks
+house-brick-suburb|C44F81LLuXg|photo-1707872732780-f98cf7592e2c|AccuPhotography|accuphotography
+bluebonnets-house|xgaaWJt7xEw|photo-1690564268193-d105ca53839a|Thomas Schimonsky|lorenzatx
+gutter-rain|ZnRvZoe8b6Q|photo-1784009198441-fce45ab9d268|set.sj|setsj
+gutter-drip|PcGSy0Vi1dw|photo-1603892853924-db25939057a6|Arno Senoner|arnosenoner
+downspout|QoGCELi19_0|photo-1765301657100-8abaff80d88f|Juan Pablo|who0ne
+before-old-house|L0cSRDaIp9g|photo-1761959166803-ed952543eeae|Roger Starnes Sr|rstar50
+before-shingle-edge|sGKPL8-gj6s|photo-1653507119088-1941fe1bd524|Michal Grabolus|michalgrabolus
+before-roof-hole|pSu0rHAED5A|photo-1783309392500-2cf6cf2fc6e9|Thilina Alagiyawanna|thilinaalagiyawanna
+before-moss-shingles|jtbS44xvGLs|photo-1680035954065-d36b7eac9e0c|Willy the Wizard|willythewizard
+before-old-shingles|dwoP4tLsl58|photo-1719866897047-fed86c08541f|Matej Spulak|matejspulak
+before-worn-roof|SXj6gb3-Slk|photo-1699445226773-d3b71110d414|Rafael Garcin|nimbus_vulpis
+commercial-flat|nmIpX-OGCG0|photo-1640476750068-72c645e653cd|Simon Hurry|bullterriere
+commercial-rooftop|zE2RHEIsXUA|photo-1771236665755-a178f7ecad0f|Filipe Nobre|filipenobre
+fw-skyline-trees|Q_N-etBvHNY|photo-1632452883889-8ba7094cae5b|J. Amill Santiago|thetaikun
+fw-skyline-dusk|vSc0f1OuIRw|photo-1608768456290-a666883849e0|Matthew Lancaster|matthewelancaster
+fw-trinity|B7-2OJVBf5I|photo-1638585614889-6221c4094cd0|Jon Haley|jonmarkhaley
+fw-sunset|g-IG7zK_Tag|photo-1586922311900-881dd996efdd|Fallon Michael|fallonmichaeltx
+fw-courthouse|Zl_gXklJHN8|photo-1678837048523-aff2889ecbf1|Fallon Michael|fallonmichaeltx
+texas-flag|zSxhFL6FnO0|photo-1741640414377-5dc05c776a18|Dheeraj M|dheeraj_m
+texas-sky|Jval-6cDC_U|photo-1615835739247-5e972d2015f8|Raychel Sanner|raychelsnr
+team-founder|CnE8CqSm4pY|photo-1722898414188-df8e94b0cfee|Green Liu|greenliustudio
+team-foreman|Lu7zfpqj6Bs|photo-1679679811837-c28b2586f533|Documerica|documerica
+homeowners|60-UVCw2p-Y|photo-1579522175533-731880bd3385|Annie Spratt|anniespratt
+framing-trusses|kkdfOe0iRu8|photo-1676802037786-3697d60497ae|Troy Mortier|troyscanon

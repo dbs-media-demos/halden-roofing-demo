@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# source assets (raw downloads, contact sheets)
+/_src/raw/
+/_src/vid/
+/_src/*.jpg
+
+.vercel
+.env*

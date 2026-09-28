@@ -1,0 +1,6 @@
+_src
+handoff
+.next
+node_modules
+*.md
+!README.md
