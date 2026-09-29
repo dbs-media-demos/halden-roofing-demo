@@ -4,7 +4,7 @@
 - Market / city: US – Fort Worth, TX (Tarrant County: Fort Worth, Arlington, Keller, Southlake, Benbrook, Burleson)
 - Languages: en
 - Live URL: https://halden-roofing-demo.vercel.app
-- Repo: local only (git initialised; GitHub org to be decided)
+- Repo: https://github.com/dbs-media-demos/halden-roofing-demo (public, branch main)
 - Folder: DBS Media Portfolio/Demo Websites/roofing
 - Stack: Next.js 16.3.6, React 19.2.8, Tailwind v4, GSAP 3.15 (ScrollTrigger, SplitText), Lenis
 - Palette: #0E1620 slate ink · #1C2A38 slate · #F2EEE7 limestone · #C4713C copper · #9A4E22 copper (text on light) · #A9C3D6 sky · #56687A storm
