@@ -1,6 +1,6 @@
 # Halden Roofing Co. — Scale by Noon concept site
 
-A demo website for a **fictional** Fort Worth roofing contractor, built by [Scale by Noon](https://scale-by-noon.vercel.app).
+A demo website for a **fictional** Fort Worth roofing contractor, built by [Scale by Noon](https://www.scalebynoon.com).
 Live: https://halden-roofing-demo.vercel.app · Handoff notes: [`DEMO.md`](DEMO.md)
 
 ## Run

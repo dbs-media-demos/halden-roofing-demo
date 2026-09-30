@@ -2,7 +2,7 @@
 
 /** The agency that built this concept site. Change the URL here once the custom domain is live. */
 export const agencyName = "Scale by Noon";
-export const agencyUrl = "https://scale-by-noon.vercel.app";
+export const agencyUrl = "https://www.scalebynoon.com";
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://halden-roofing-demo.vercel.app").replace(/\/$/, "");
 
