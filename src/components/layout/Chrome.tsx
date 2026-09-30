@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { PhoneIcon } from "@/components/ui/Button";
-import { site, telHref } from "@/lib/site";
+import { site, telHref, agencyName, agencyUrl } from "@/lib/site";
 import { useDismissed } from "@/lib/session-flag";
 
 /** Sticky Call + Free inspection bar on phones. */
@@ -41,9 +41,9 @@ export function MobileBar() {
   );
 }
 
-/** "Concept site by DBS Media" pill — tasteful, dismissible. */
+/** "Concept site by Scale by Noon" pill — tasteful, dismissible. */
 export function DemoPill() {
-  const [dismissed, dismiss] = useDismissed("dbs-demo-pill");
+  const [dismissed, dismiss] = useDismissed("agency-demo-pill");
   const [shown, setShown] = useState(false);
   useEffect(() => {
     // Appear once the visitor starts scrolling, so it never sits on top of the hero copy.
@@ -63,9 +63,9 @@ export function DemoPill() {
         shown ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0 focus-within:pointer-events-auto focus-within:translate-y-0 focus-within:opacity-100",
       )}
     >
-      <a href="https://dbs-media.com" target="_blank" rel="noopener" className="flex min-h-10 items-center gap-2 py-2 pl-4 pr-2 text-[0.78rem] font-medium">
+      <a href={agencyUrl} target="_blank" rel="noopener" className="flex min-h-10 items-center gap-2 py-2 pl-4 pr-2 text-[0.78rem] font-medium">
         <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-copper" />
-        Concept site by DBS Media ↗
+        Concept site by {agencyName} ↗
       </a>
       <button
         type="button"

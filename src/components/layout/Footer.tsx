@@ -3,7 +3,7 @@ import { Mark } from "@/components/brand/Logo";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { services } from "@/content/services";
 import { cities } from "@/content/cities";
-import { site, telHref, mailHref, addressLine } from "@/lib/site";
+import { site, telHref, mailHref, addressLine, agencyName, agencyUrl } from "@/lib/site";
 import { FooterWordmark } from "./FooterWordmark";
 
 const company = [
@@ -96,8 +96,8 @@ export function Footer() {
         </p>
         <p>
           Design &amp; development:{" "}
-          <a href="https://dbs-media.com" target="_blank" rel="noopener" className="text-muted underline decoration-line underline-offset-4 hover:text-stone">
-            DBS Media
+          <a href={agencyUrl} target="_blank" rel="noopener" className="text-muted underline decoration-line underline-offset-4 hover:text-stone">
+            {agencyName}
           </a>
         </p>
       </div>

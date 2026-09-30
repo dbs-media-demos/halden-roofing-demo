@@ -1,6 +1,6 @@
-# Halden Roofing Co. (DBS Media demo)
+# Halden Roofing Co. (Scale by Noon demo)
 
-- Niche: roofing         (matches dbs-media.com industry id: roofing)
+- Niche: roofing         (matches scale-by-noon.vercel.app industry id: roofing)
 - Market / city: US – Fort Worth, TX (Tarrant County: Fort Worth, Arlington, Keller, Southlake, Benbrook, Burleson)
 - Languages: en
 - Live URL: https://halden-roofing-demo.vercel.app

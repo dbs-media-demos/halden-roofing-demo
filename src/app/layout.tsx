@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./display-font.css";
 import "./globals.css";
 import { fontVariables } from "@/lib/fonts";
-import { site, siteUrl, noindex } from "@/lib/site";
+import { site, siteUrl, noindex, agencyName, agencyUrl } from "@/lib/site";
 import { graph, businessSchema, websiteSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Header } from "@/components/layout/Header";
@@ -15,8 +15,8 @@ export const metadata: Metadata = {
   title: { default: `${site.name} — Fort Worth Roofers Since 1998`, template: `%s | ${site.name}` },
   description: site.description,
   applicationName: site.name,
-  authors: [{ name: "DBS Media", url: "https://dbs-media.com" }],
-  creator: "DBS Media",
+  authors: [{ name: agencyName, url: agencyUrl }],
+  creator: agencyName,
   formatDetection: { telephone: false },
   robots: noindex ? { index: false, follow: false, googleBot: { index: false, follow: false } } : undefined,
 };

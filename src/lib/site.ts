@@ -1,4 +1,8 @@
-/** Business facts for the fictional Halden Roofing Co. (a DBS Media concept site). */
+/** Business facts for the fictional Halden Roofing Co. (a Scale by Noon concept site). */
+
+/** The agency that built this concept site. Change the URL here once the custom domain is live. */
+export const agencyName = "Scale by Noon";
+export const agencyUrl = "https://scale-by-noon.vercel.app";
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://halden-roofing-demo.vercel.app").replace(/\/$/, "");
 

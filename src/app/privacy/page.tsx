@@ -3,7 +3,7 @@ import { PageShell } from "@/components/layout/PageShell";
 import { Breadcrumbs } from "@/components/layout/PageHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildMetadata } from "@/lib/seo";
-import { site, mailHref } from "@/lib/site";
+import { site, mailHref, agencyName } from "@/lib/site";
 import { graph, breadcrumbSchema, webPageSchema } from "@/lib/schema";
 
 const description = "How Halden Roofing Co. collects, uses and protects the information you share with us.";
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
           <p className="t-spec mt-6 text-muted">Last updated September 28, 2026</p>
           <div className="prose-halden mt-12">
             <p>
-              <strong>This is a concept website.</strong> {site.name} is a fictional business created by DBS Media to demonstrate a
+              <strong>This is a concept website.</strong> {site.name} is a fictional business created by {agencyName} to demonstrate a
               roofing website. The forms on this site do not send, store or share any information. The policy below shows what a
               real roofing company&rsquo;s policy would cover.
             </p>
