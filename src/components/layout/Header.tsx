@@ -10,7 +10,8 @@ import { Button, PhoneIcon } from "@/components/ui/Button";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { services } from "@/content/services";
 import { photos } from "@/lib/photos";
-import { site, telHref } from "@/lib/site";
+import { useBiz } from "@/components/preview/BizContext";
+import { telOf } from "@/lib/biz-core";
 import { useDismissed } from "@/lib/session-flag";
 
 const links = [
@@ -24,6 +25,8 @@ const links = [
 const BANNER_KEY = "halden-hail-banner";
 
 export function Header() {
+  const biz = useBiz();
+  const telHref = telOf(biz) ?? "";
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -168,7 +171,7 @@ export function Header() {
           <div className="flex items-center gap-2">
             <a href={telHref} className="hidden items-center gap-2 rounded-full px-3 py-2.5 text-[0.93rem] font-semibold xl:flex">
               <PhoneIcon className="text-copper" />
-              {site.phoneDisplay}
+              {biz.phoneDisplay}
             </a>
             <span className="hidden sm:block">
               <Button href="/free-inspection">Free inspection</Button>
@@ -263,7 +266,7 @@ export function Header() {
           <div className="mt-auto flex flex-col gap-3 py-8">
             <OpenBadge className="text-muted" />
             <a href={telHref} tabIndex={menuOpen ? 0 : -1} className="font-display text-2xl font-bold">
-              {site.phoneDisplay}
+              {biz.phoneDisplay}
             </a>
             <Button href="/free-inspection" size="lg" className="w-full">
               Book a free inspection

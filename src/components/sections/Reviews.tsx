@@ -1,6 +1,8 @@
 import clsx from "clsx";
 import { reviews, type Review } from "@/content/reviews";
-import { site } from "@/lib/site";
+import { defaultBiz } from "@/lib/biz";
+import type { Biz } from "@/lib/biz-core";
+import { scrubReview } from "@/lib/scrub";
 import { Reveal, SplitReveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 
@@ -16,7 +18,7 @@ export function Stars({ n = 5, className }: { n?: number; className?: string }) 
   );
 }
 
-export function ReviewCard({ r, className }: { r: Review; className?: string }) {
+export function ReviewCard({ r, className, area, shortName }: { r: Review; className?: string; area?: string; shortName?: string }) {
   return (
     <figure className={clsx("flex flex-col rounded-[2px] border border-line bg-surface p-6", className)}>
       <div className="flex items-center gap-3">
@@ -25,25 +27,25 @@ export function ReviewCard({ r, className }: { r: Review; className?: string }) 
         </span>
         <figcaption className="leading-tight">
           <span className="block font-semibold">{r.author}</span>
-          <span className="t-spec text-muted">{r.city}</span>
+          <span className="t-spec text-muted">{area ?? r.city}</span>
         </figcaption>
       </div>
       <div className="mt-4 flex items-center gap-3">
         <Stars n={r.rating} />
         <span className="text-sm text-muted">{r.ago}</span>
       </div>
-      <blockquote className="mt-3 flex-1 text-[0.97rem] leading-relaxed text-muted">{r.text}</blockquote>
+      <blockquote className="mt-3 flex-1 text-[0.97rem] leading-relaxed text-muted">{shortName ? scrubReview(r.text, shortName) : r.text}</blockquote>
       <p className="t-spec mt-5 text-accent">{r.job}</p>
     </figure>
   );
 }
 
-function Row({ items, reverse, hidden }: { items: Review[]; reverse?: boolean; hidden?: boolean }) {
+function Row({ items, reverse, hidden, area, shortName }: { items: Review[]; reverse?: boolean; hidden?: boolean; area?: string; shortName?: string }) {
   return (
     <div className="marquee-wrap overflow-hidden" aria-hidden={hidden}>
       <div className={clsx("marquee flex w-max gap-5 pr-5", reverse && "marquee-rev")} style={{ "--dur": "80s" } as React.CSSProperties}>
         {[...items, ...items].map((r, i) => (
-          <ReviewCard key={i} r={r} className="w-[82vw] shrink-0 sm:w-[380px]" />
+          <ReviewCard key={i} r={r} area={area} shortName={shortName} className="w-[82vw] shrink-0 sm:w-[380px]" />
         ))}
       </div>
     </div>
@@ -51,40 +53,45 @@ function Row({ items, reverse, hidden }: { items: Review[]; reverse?: boolean; h
 }
 
 /** Google-style rating header + two drifting rows of review cards. */
-export function Reviews() {
+export function Reviews({ biz = defaultBiz }: { biz?: Biz }) {
   const half = Math.ceil(reviews.length / 2);
+  // Previews show the concept's sample reviews, placed in the business's area and labelled as samples
+  const area = biz.preview ? biz.area : undefined;
+  const shortName = biz.preview ? biz.shortName : undefined;
   return (
     <section aria-labelledby="reviews-title" className="theme-ink relative overflow-hidden py-24 md:py-36">
       <div className="wrap grid gap-10 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
-          <p className="t-eyebrow text-accent">Reviews</p>
+          <p className="t-eyebrow text-accent">{biz.preview ? "Reviews · samples" : "Reviews"}</p>
           <SplitReveal id="reviews-title" className="t-h2 mt-5">
-            612 neighbors can&rsquo;t all be wrong.
+            {biz.preview ? (biz.rating ? `${biz.rating.count} neighbors can’t all be wrong.` : "Neighbors, in their words.") : "612 neighbors can’t all be wrong."}
           </SplitReveal>
         </div>
-        <Reveal className="flex items-end gap-6 md:col-span-5 md:justify-end">
-          <p className="font-display text-[5.5rem] font-black leading-[0.8] tracking-[-0.06em]">{site.rating.value}</p>
-          <div>
-            <Stars n={5} />
-            <p className="mt-2 text-muted">
-              Average from {site.rating.count} Google reviews
-              <span className="t-spec block text-faint">Updated September 2026</span>
-            </p>
-          </div>
-        </Reveal>
+        {biz.rating && (
+          <Reveal className="flex items-end gap-6 md:col-span-5 md:justify-end">
+            <p className="font-display text-[5.5rem] font-black leading-[0.8] tracking-[-0.06em]">{biz.rating.value}</p>
+            <div>
+              <Stars n={5} />
+              <p className="mt-2 text-muted">
+                Average from {biz.rating.count} Google reviews
+                {!biz.preview && <span className="t-spec block text-faint">Updated September 2026</span>}
+              </p>
+            </div>
+          </Reveal>
+        )}
       </div>
 
       {/* Accessible list for screen readers; the marquees are decorative duplicates. */}
       <ul className="sr-only">
         {reviews.slice(0, 6).map((r) => (
           <li key={r.author}>
-            {r.author}, {r.city}: {r.text}
+            {r.author}, {area ?? r.city}: {shortName ? scrubReview(r.text, shortName) : r.text}
           </li>
         ))}
       </ul>
       <div className="mt-16 flex flex-col gap-5" aria-hidden>
-        <Row items={reviews.slice(0, half)} hidden />
-        <Row items={reviews.slice(half)} reverse hidden />
+        <Row items={reviews.slice(0, half)} area={area} shortName={shortName} hidden />
+        <Row items={reviews.slice(half)} area={area} shortName={shortName} reverse hidden />
       </div>
 
       <div className="wrap mt-12">

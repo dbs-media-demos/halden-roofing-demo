@@ -3,12 +3,8 @@ import "./display-font.css";
 import "./globals.css";
 import { fontVariables } from "@/lib/fonts";
 import { site, siteUrl, noindex, agencyName, agencyUrl } from "@/lib/site";
-import { graph, businessSchema, websiteSchema } from "@/lib/schema";
-import { JsonLd } from "@/components/seo/JsonLd";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
-import { Cursor, DemoPill, MobileBar } from "@/components/layout/Chrome";
+import { Cursor } from "@/components/layout/Chrome";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -29,9 +25,6 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-US" className={fontVariables} suppressHydrationWarning>
-      <head>
-        <JsonLd data={graph(businessSchema(), websiteSchema())} />
-      </head>
       <body className="theme-ink min-h-screen">
         <a
           href="#main"
@@ -40,11 +33,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <SmoothScroll />
-        <Header />
+        {/* Header, footer and the rest come from (site)/layout or for/[token]/layout (SiteChrome) */}
         {children}
-        <Footer />
-        <MobileBar />
-        <DemoPill />
         <Cursor />
       </body>
     </html>

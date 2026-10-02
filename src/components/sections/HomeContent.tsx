@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Hero } from "@/components/sections/Hero";
 import { Intro } from "@/components/sections/Intro";
@@ -13,48 +13,40 @@ import { Reviews } from "@/components/sections/Reviews";
 import { ServiceMap } from "@/components/sections/ServiceMap";
 import { FaqSection } from "@/components/sections/Faq";
 import { CtaBand } from "@/components/sections/CtaBand";
-import { JsonLd } from "@/components/seo/JsonLd";
-import { buildMetadata } from "@/lib/seo";
-import { site } from "@/lib/site";
-import { graph, webPageSchema, faqSchema } from "@/lib/schema";
+import { PreviewMap } from "@/components/preview/PreviewMap";
 import { homeFaqs } from "@/content/faqs";
 import { cities } from "@/content/cities";
-
-export const metadata: Metadata = buildMetadata({
-  title: `${site.name} — Fort Worth Roofers Since 1998`,
-  absoluteTitle: true,
-  description:
-    "Family-owned Fort Worth roofing company since 1998. Free roof inspections with a same-day photo report, hail & insurance claim help, 1–2 day installs, 25-year workmanship warranty.",
-  path: "/",
-  eyebrow: "Fort Worth, TX · Since 1998",
-});
+import { defaultBiz } from "@/lib/biz";
+import type { Biz } from "@/lib/biz-core";
 
 const neighborhoods = cities.flatMap((c) => c.neighborhoods.slice(0, 3));
 
-export default function HomePage() {
+/**
+ * The homepage sections. The concept site renders them as they are; a personalised preview
+ * (/for/<token>) passes a real business: its name, phone, hours, rating and a map of its address
+ * replace Halden's, and the Fort Worth neighbourhood marquee and Tarrant County map step aside.
+ */
+export function HomeContent({ biz = defaultBiz, children }: { biz?: Biz; children?: ReactNode }) {
   return (
     <PageShell>
-      <JsonLd
-        data={graph(
-          webPageSchema({ path: "/", name: `${site.name} — Fort Worth Roofers`, description: site.description }),
-          faqSchema(homeFaqs),
-        )}
-      />
+      {children}
       <Hero />
-      <Intro />
+      <Intro biz={biz} />
       <ServicesList />
-      <div className="theme-ink border-y border-line py-7">
-        <Marquee items={neighborhoods} className="font-display text-[clamp(1.4rem,3vw,2.6rem)] font-extrabold uppercase tracking-[-0.03em] text-stone/85" />
-      </div>
+      {!biz.preview && (
+        <div className="theme-ink border-y border-line py-7">
+          <Marquee items={neighborhoods} className="font-display text-[clamp(1.4rem,3vw,2.6rem)] font-extrabold uppercase tracking-[-0.03em] text-stone/85" />
+        </div>
+      )}
       <ProjectsRail />
       <StormStory />
       <StormChaser />
       <MaterialExplorer />
       <Warranty />
-      <Reviews />
-      <ServiceMap />
+      <Reviews biz={biz} />
+      {biz.preview ? <PreviewMap biz={biz} /> : <ServiceMap />}
       <FaqSection items={homeFaqs} />
-      <CtaBand />
+      <CtaBand biz={biz} />
     </PageShell>
   );
 }

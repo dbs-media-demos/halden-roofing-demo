@@ -2,9 +2,12 @@
 
 import { useRef } from "react";
 import { gsap, useIdleGSAP, prefersReducedMotion } from "@/lib/gsap";
+import { useBiz } from "@/components/preview/BizContext";
 
 /** Giant outlined HALDEN that fills with copper, letter by letter, as the footer arrives. */
 export function FooterWordmark() {
+  const biz = useBiz();
+  const word = biz.preview ? (biz.shortName.split(/\s+/)[0] || biz.shortName).toUpperCase().slice(0, 10) : "HALDEN";
   const ref = useRef<HTMLDivElement>(null);
 
   useIdleGSAP(
@@ -30,7 +33,7 @@ export function FooterWordmark() {
   return (
     <div ref={ref} aria-hidden className="wrap mt-16 select-none overflow-hidden">
       <div className="flex justify-between font-display text-[19.5vw] font-black leading-[0.8] tracking-[-0.06em] md:text-[18.5vw]">
-        {"HALDEN".split("").map((l, i) => (
+        {word.split("").map((l, i) => (
           <span
             key={i}
             data-l

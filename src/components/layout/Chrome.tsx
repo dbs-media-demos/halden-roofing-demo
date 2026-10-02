@@ -4,11 +4,14 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { PhoneIcon } from "@/components/ui/Button";
-import { site, telHref, agencyName, agencyUrl } from "@/lib/site";
+import { agencyName, agencyUrl } from "@/lib/site";
+import { useBiz } from "@/components/preview/BizContext";
+import { telOf } from "@/lib/biz-core";
 import { useDismissed } from "@/lib/session-flag";
 
 /** Sticky Call + Free inspection bar on phones. */
 export function MobileBar() {
+  const biz = useBiz();
   const [show, setShow] = useState(false);
   useEffect(() => {
     const onScroll = () => setShow(window.scrollY > 280);
@@ -26,9 +29,9 @@ export function MobileBar() {
     >
       <div className="grid grid-cols-[auto_1fr] gap-2">
         <a
-          href={telHref}
+          href={telOf(biz)}
           className="flex min-h-12 items-center justify-center gap-2 rounded-full border border-stone/20 px-5 font-semibold text-stone"
-          aria-label={`Call ${site.phoneDisplay}`}
+          aria-label={`Call ${biz.phoneDisplay}`}
         >
           <PhoneIcon className="text-copper" />
           Call
@@ -43,6 +46,7 @@ export function MobileBar() {
 
 /** "Concept site by Scale by Noon" pill — tasteful, dismissible. */
 export function DemoPill() {
+  const biz = useBiz();
   const [dismissed, dismiss] = useDismissed("agency-demo-pill");
   const [shown, setShown] = useState(false);
   useEffect(() => {
@@ -65,7 +69,13 @@ export function DemoPill() {
     >
       <a href={agencyUrl} target="_blank" rel="noopener" className="flex min-h-10 items-center gap-2 py-2 pl-4 pr-2 text-[0.78rem] font-medium">
         <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-copper" />
-        Concept site by {agencyName} ↗
+        {biz.preview ? (
+          <span className="inline-block max-w-[15rem] truncate align-bottom sm:max-w-none">
+            Preview for {biz.shortName} · by {agencyName} ↗
+          </span>
+        ) : (
+          <>Concept site by {agencyName} ↗</>
+        )}
       </a>
       <button
         type="button"

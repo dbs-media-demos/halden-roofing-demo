@@ -2,18 +2,25 @@
 
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import { getOpenStatus, type OpenStatus } from "@/lib/hours";
+import { openStatus } from "@/lib/biz-core";
+import { useBiz } from "@/components/preview/BizContext";
 
 /** Live open/closed badge. Renders a neutral label on the server, then the real status. */
 export function OpenBadge({ className }: { className?: string }) {
-  const [status, setStatus] = useState<OpenStatus | null>(null);
+  const biz = useBiz();
+  const [status, setStatus] = useState<{ open: boolean; label: string } | null>(null);
 
   useEffect(() => {
-    const tick = () => setStatus(getOpenStatus());
+    const tick = () => {
+      const s = openStatus(biz);
+      setStatus(s ? { open: s.open, label: s.text } : null);
+    };
     tick();
     const id = window.setInterval(tick, 60_000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [biz]);
+
+  if (!biz.hours) return null;
 
   return (
     <span className={clsx("t-eyebrow inline-flex items-center gap-2", className)} aria-live="polite">
@@ -24,7 +31,7 @@ export function OpenBadge({ className }: { className?: string }) {
           status?.open ? "bg-[#5fbf7f] pulse-dot" : status ? "bg-copper" : "bg-current opacity-50",
         )}
       />
-      <span suppressHydrationWarning>{status?.label ?? "Mon – Fri 7 am – 6 pm"}</span>
+      <span suppressHydrationWarning>{status?.label ?? biz.hoursSummary}</span>
     </span>
   );
 }

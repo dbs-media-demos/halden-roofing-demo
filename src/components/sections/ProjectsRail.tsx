@@ -9,9 +9,13 @@ import { gsap, useIdleGSAP, prefersReducedMotion } from "@/lib/gsap";
 import { SplitReveal } from "@/components/ui/Reveal";
 import { BeforeAfter } from "@/components/ui/BeforeAfter";
 import { Button } from "@/components/ui/Button";
+import { useBiz } from "@/components/preview/BizContext";
+import { scrubProjectTitle } from "@/lib/scrub";
 
 /** Featured before/after + a horizontal, scroll-driven rail of case studies. */
 export function ProjectsRail() {
+  const biz = useBiz();
+  const titleOf = (p: (typeof projects)[number]) => (biz.preview ? scrubProjectTitle(p) : p.title);
   const pin = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const featured = projects[0];
@@ -66,13 +70,13 @@ export function ProjectsRail() {
             beforeAlt="Hail-damaged shingle edge with granule loss before replacement"
             afterAlt="New Class 4 architectural shingles after replacement"
             className="aspect-[4/3] w-full lg:col-span-8 lg:aspect-[16/10]"
-            label={`${featured.title}: before and after`}
+            label={`${titleOf(featured)}: before and after`}
           />
           <div className="lg:col-span-4">
             <p className="t-eyebrow text-muted">
-              {featured.neighborhood}, {featured.city} · {featured.year}
+              {biz.preview ? biz.area : `${featured.neighborhood}, ${featured.city}`} · {featured.year}
             </p>
-            <h3 className="t-h3 mt-3">{featured.title}</h3>
+            <h3 className="t-h3 mt-3">{titleOf(featured)}</h3>
             <p className="mt-4 text-muted">{featured.summary}</p>
             <dl className="mt-6 grid grid-cols-3 gap-4 border-t border-line pt-6">
               {featured.stats.map((s) => (
@@ -110,7 +114,7 @@ export function ProjectsRail() {
                   <div data-card-img className="absolute inset-[-6%]">
                     <Image
                       src={photos[p.hero]}
-                      alt={`${p.title} — ${p.material}`}
+                      alt={`${titleOf(p)} — ${p.material}`}
                       fill
                       sizes="(min-width: 1024px) 34vw, 78vw"
                       className="object-cover transition-transform duration-1000 ease-[var(--ease-out-expo)] group-hover:scale-105"
@@ -119,9 +123,9 @@ export function ProjectsRail() {
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-5 text-stone md:p-7">
                     <p className="t-eyebrow text-stone/80">
-                      0{i + 1} · {p.city}
+                      0{i + 1} · {biz.preview ? biz.area : p.city}
                     </p>
-                    <p className="mt-2 font-display text-[clamp(1.3rem,2vw,1.9rem)] font-extrabold uppercase leading-none tracking-[-0.03em]">{p.title}</p>
+                    <p className="mt-2 font-display text-[clamp(1.3rem,2vw,1.9rem)] font-extrabold uppercase leading-none tracking-[-0.03em]">{titleOf(p)}</p>
                   </div>
                 </div>
               </ViewTransition>

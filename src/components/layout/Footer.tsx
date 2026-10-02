@@ -3,7 +3,9 @@ import { Mark } from "@/components/brand/Logo";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { services } from "@/content/services";
 import { cities } from "@/content/cities";
-import { site, telHref, mailHref, addressLine, agencyName, agencyUrl } from "@/lib/site";
+import { site, mailHref, agencyName, agencyUrl } from "@/lib/site";
+import { defaultBiz } from "@/lib/biz";
+import { DAY_NAMES, dayRange, telOf, weekFromMonday, type Biz } from "@/lib/biz-core";
 import { FooterWordmark } from "./FooterWordmark";
 
 const company = [
@@ -16,7 +18,7 @@ const company = [
   { href: "/privacy", label: "Privacy" },
 ];
 
-export function Footer() {
+export function Footer({ biz = defaultBiz }: { biz?: Biz }) {
   return (
     <footer className="theme-ink relative overflow-hidden border-t border-line pb-28 pt-20 md:pb-10">
       <div className="wrap">
@@ -25,13 +27,15 @@ export function Footer() {
             <Mark className="h-14 w-14" />
             <p className="t-h3 mt-6 max-w-sm">Built for the next storm. Here for the one after that.</p>
             <div className="mt-8 flex flex-col gap-2 text-[0.98rem]">
-              <a href={telHref} className="font-display text-2xl font-bold tracking-[-0.02em] hover:text-copper-2">
-                {site.phoneDisplay}
+              <a href={telOf(biz)} className="font-display text-2xl font-bold tracking-[-0.02em] hover:text-copper-2">
+                {biz.phoneDisplay}
               </a>
-              <a href={mailHref} className="text-muted hover:text-stone">
-                {site.email}
-              </a>
-              <p className="text-muted">{addressLine}</p>
+              {!biz.preview && (
+                <a href={mailHref} className="text-muted hover:text-stone">
+                  {site.email}
+                </a>
+              )}
+              <p className="text-muted">{biz.address.full}</p>
             </div>
           </div>
 
@@ -51,7 +55,7 @@ export function Footer() {
           <nav aria-label="Service areas" className="md:col-span-2">
             <p className="t-eyebrow text-faint">Service areas</p>
             <ul className="mt-5 flex flex-col gap-2.5">
-              {cities.map((c) => (
+              {(biz.preview ? [{ slug: "", name: biz.area }] : cities).map((c) => (
                 <li key={c.slug}>
                   <Link href={`/service-areas/${c.slug}`} className="text-muted transition-colors hover:text-stone">
                     {c.name}
@@ -75,12 +79,19 @@ export function Footer() {
             <div className="mt-8 border-t border-line pt-6">
               <OpenBadge className="text-stone" />
               <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-sm">
-                {site.hoursDisplay.map((h) => (
-                  <div key={h.label} className="contents">
-                    <dt className="text-faint">{h.label}</dt>
-                    <dd className="text-muted">{h.value}</dd>
-                  </div>
-                ))}
+                {biz.preview
+                  ? weekFromMonday(biz.hours ?? []).map((h) => (
+                      <div key={h.day} className="contents">
+                        <dt className="text-faint">{DAY_NAMES.en[h.day]}</dt>
+                        <dd className="text-muted">{dayRange(h, "en")}</dd>
+                      </div>
+                    ))
+                  : site.hoursDisplay.map((h) => (
+                      <div key={h.label} className="contents">
+                        <dt className="text-faint">{h.label}</dt>
+                        <dd className="text-muted">{h.value}</dd>
+                      </div>
+                    ))}
               </dl>
             </div>
           </nav>
@@ -91,8 +102,16 @@ export function Footer() {
 
       <div className="wrap mt-6 flex flex-col gap-3 border-t border-line pt-6 text-sm text-faint md:flex-row md:items-center md:justify-between">
         <p>
-          © {new Date().getFullYear()} {site.legalName} · Fully insured · A fictional business —{" "}
-          <span className="text-muted">this is a concept site.</span>
+          {biz.preview ? (
+            <>
+              © {new Date().getFullYear()} {biz.name} · <span className="text-muted">A preview homepage made for {biz.name}.</span>
+            </>
+          ) : (
+            <>
+              © {new Date().getFullYear()} {site.legalName} · Fully insured · A fictional business —{" "}
+              <span className="text-muted">this is a concept site.</span>
+            </>
+          )}
         </p>
         <p>
           Design &amp; development:{" "}

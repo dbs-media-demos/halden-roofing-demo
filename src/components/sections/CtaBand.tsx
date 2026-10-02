@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { photos, type PhotoKey } from "@/lib/photos";
-import { site, telHref } from "@/lib/site";
+import { defaultBiz } from "@/lib/biz";
+import { telOf, type Biz } from "@/lib/biz-core";
 import { Parallax, SplitReveal, Reveal } from "@/components/ui/Reveal";
 import { Button, PhoneIcon } from "@/components/ui/Button";
 import { OpenBadge } from "@/components/ui/OpenBadge";
@@ -10,10 +11,12 @@ export function CtaBand({
   image = "house-ranch-dusk",
   title = "Straight answers about your roof. Free.",
   text = "Book a free inspection and get a photo report the same day. We call back within 2 hours during business hours.",
+  biz = defaultBiz,
 }: {
   image?: PhotoKey;
   title?: string;
   text?: string;
+  biz?: Biz;
 }) {
   return (
     <section aria-labelledby="cta-title" className="theme-ink gable-top relative overflow-hidden">
@@ -32,9 +35,11 @@ export function CtaBand({
             <Button href="/free-inspection" size="lg">
               Book a free inspection
             </Button>
-            <Button href={telHref} variant="light" size="lg" icon={<PhoneIcon />}>
-              {site.phoneDisplay}
-            </Button>
+            {biz.phone && (
+              <Button href={telOf(biz)!} variant="light" size="lg" icon={<PhoneIcon />}>
+                {biz.phoneDisplay}
+              </Button>
+            )}
           </div>
         </Reveal>
       </div>

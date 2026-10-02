@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { gsap, useGSAP, prefersReducedMotion } from "@/lib/gsap";
 import { photos } from "@/lib/photos";
-import { site, telHref } from "@/lib/site";
+import { useBiz } from "@/components/preview/BizContext";
+import { telOf } from "@/lib/biz-core";
 import { Button, PhoneIcon } from "@/components/ui/Button";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 
@@ -15,6 +16,7 @@ import { OpenBadge } from "@/components/ui/OpenBadge";
  * the headline splits apart like two roof slopes.
  */
 export function Hero() {
+  const biz = useBiz();
   const root = useRef<HTMLElement>(null);
   const win = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
@@ -108,13 +110,21 @@ export function Hero() {
           <div data-hero-fade>
           <div className="anim-fade flex items-start justify-between gap-6">
             <p className="t-eyebrow text-muted">
-              Fort Worth, TX <span className="text-copper">/</span> Est. 1998
+              {biz.preview ? (
+                [biz.address.city || biz.area, biz.address.region].filter(Boolean).join(", ")
+              ) : (
+                <>
+                  Fort Worth, TX <span className="text-copper">/</span> Est. 1998
+                </>
+              )}
             </p>
             <div className="hidden flex-col items-end gap-2 md:flex">
               <OpenBadge className="text-muted" />
-              <p className="t-eyebrow text-muted">
-                <span className="text-copper-2">★★★★★</span> {site.rating.value} · {site.rating.count} Google reviews
-              </p>
+              {biz.rating && (
+                <p className="t-eyebrow text-muted">
+                  <span className="text-copper-2">★★★★★</span> {biz.rating.value} · {biz.rating.count} Google reviews
+                </p>
+              )}
             </div>
           </div>
           </div>
@@ -143,9 +153,11 @@ export function Hero() {
                 Book a free inspection
               </Button>
               <span className="hidden sm:block">
-                <Button href={telHref} variant="ghost" size="lg" icon={<PhoneIcon className="text-copper" />}>
-                  {site.phoneDisplay}
-                </Button>
+                {biz.phone && (
+                  <Button href={telOf(biz)!} variant="ghost" size="lg" icon={<PhoneIcon className="text-copper" />}>
+                    {biz.phoneDisplay}
+                  </Button>
+                )}
               </span>
             </div>
           </div>

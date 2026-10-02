@@ -1,4 +1,7 @@
+"use client";
+
 import clsx from "clsx";
+import { useBiz } from "@/components/preview/BizContext";
 
 /**
  * The Halden mark: a single-line gable at a true 6/12 pitch whose walls and
@@ -37,13 +40,16 @@ export function Mark({ className, animated = false, title }: { className?: strin
 }
 
 export function Logo({ className, compact = false }: { className?: string; compact?: boolean }) {
+  const biz = useBiz();
   return (
     <span className={clsx("inline-flex items-center gap-2.5", className)}>
       <Mark className="h-9 w-9" animated />
       <span className="flex flex-col leading-none">
-        <span className="font-display text-[1.15rem] font-extrabold tracking-[-0.02em]">HALDEN</span>
+        <span className={clsx("block max-w-[11rem] truncate font-display font-extrabold uppercase tracking-[-0.02em] xl:max-w-[18rem]", biz.preview && biz.shortName.length > 14 ? "text-[0.95rem]" : "text-[1.15rem]")}>
+          {biz.preview ? biz.shortName : "HALDEN"}
+        </span>
         {!compact && (
-          <span className="mt-1 hidden font-mono text-[0.56rem] tracking-[0.22em] text-muted sm:block">ROOFING CO. · EST. 1998</span>
+          <span className="mt-1 hidden font-mono text-[0.56rem] tracking-[0.22em] text-muted sm:block">{biz.preview ? "ROOFING" : "ROOFING CO. · EST. 1998"}</span>
         )}
       </span>
     </span>
