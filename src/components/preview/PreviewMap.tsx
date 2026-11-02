@@ -1,6 +1,7 @@
 import { SplitReveal, Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 import { OpenBadge } from "@/components/ui/OpenBadge";
+import { Drone } from "@/components/fx/Drone";
 import { DAY_NAMES, dayRange, weekFromMonday, type Biz } from "@/lib/biz-core";
 
 /** A preview's "where we are": the business's real address on a Google map, hours and directions. */
@@ -39,6 +40,7 @@ export function PreviewMap({ biz }: { biz: Biz }) {
         <Reveal className="lg:col-span-7">
           <div className="relative aspect-square overflow-hidden rounded-[2px] border border-line sm:aspect-[4/3]">
             <iframe src={embed} title={`Map: ${query}`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="absolute inset-0 h-full w-full border-0" />
+            <Drone />
           </div>
         </Reveal>
       </div>

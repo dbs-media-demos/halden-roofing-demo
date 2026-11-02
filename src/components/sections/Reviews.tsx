@@ -5,6 +5,7 @@ import type { Biz } from "@/lib/biz-core";
 import { scrubReview } from "@/lib/scrub";
 import { Reveal, SplitReveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
+import { Neighborhood } from "@/components/fx/Neighborhood";
 
 export function Stars({ n = 5, className }: { n?: number; className?: string }) {
   return (
@@ -59,7 +60,7 @@ export function Reviews({ biz = defaultBiz }: { biz?: Biz }) {
   const area = biz.preview ? biz.area : undefined;
   const shortName = biz.preview ? biz.shortName : undefined;
   return (
-    <section aria-labelledby="reviews-title" className="theme-ink relative overflow-hidden py-24 md:py-36">
+    <section aria-labelledby="reviews-title" className="theme-ink relative overflow-hidden pb-28 pt-24 md:pb-44 md:pt-36">
       <div className="wrap grid gap-10 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
           <p className="t-eyebrow text-accent">{biz.preview ? "Reviews · samples" : "Reviews"}</p>
@@ -94,11 +95,12 @@ export function Reviews({ biz = defaultBiz }: { biz?: Biz }) {
         <Row items={reviews.slice(half)} area={area} shortName={shortName} reverse hidden />
       </div>
 
-      <div className="wrap mt-12">
+      <div className="wrap relative z-[1] mt-12">
         <Button href="/reviews" variant="ghost">
           Read all reviews
         </Button>
       </div>
+      <Neighborhood />
     </section>
   );
 }

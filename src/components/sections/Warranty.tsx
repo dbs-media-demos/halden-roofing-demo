@@ -3,6 +3,7 @@ import { warrantyTiers } from "@/content/company";
 import { site } from "@/lib/site";
 import { Reveal, SplitReveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
+import { RainRoof } from "@/components/fx/RainRoof";
 
 /** Workmanship-warranty tiers + the "from $89/mo" financing band. */
 export function Warranty({ showFinancing = true, headingAs = "h2" }: { showFinancing?: boolean; headingAs?: "h2" | "h1" }) {
@@ -24,7 +25,7 @@ export function Warranty({ showFinancing = true, headingAs = "h2" }: { showFinan
           </Reveal>
         </div>
 
-        <Reveal stagger={0.1} className="mt-14 grid gap-5 lg:grid-cols-3 lg:items-stretch">
+        <Reveal stagger={0.1} className="mt-14 grid gap-5 max-lg:gap-y-11 lg:grid-cols-3 lg:items-stretch">
           {warrantyTiers.map((t) => (
             <article
               key={t.id}
@@ -33,9 +34,7 @@ export function Warranty({ showFinancing = true, headingAs = "h2" }: { showFinan
                 t.featured ? "theme-ink lg:-my-6 lg:py-14" : "border border-line bg-stone-2",
               )}
             >
-              {t.featured && (
-                <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-copper [clip-path:polygon(0_100%,50%_0,100%_100%)]" />
-              )}
+              {t.featured && <RainRoof />}
               <p className="t-eyebrow text-accent">{t.note}</p>
               <h3 className="mt-4 font-display text-3xl font-extrabold uppercase tracking-[-0.03em]">{t.name}</h3>
               <p className="mt-6 flex items-baseline gap-2">

@@ -11,6 +11,7 @@ import { BeforeAfter } from "@/components/ui/BeforeAfter";
 import { Button } from "@/components/ui/Button";
 import { useBiz } from "@/components/preview/BizContext";
 import { scrubProjectTitle } from "@/lib/scrub";
+import { RoofMeter } from "@/components/fx/RoofMeter";
 
 /** Featured before/after + a horizontal, scroll-driven rail of case studies. */
 export function ProjectsRail() {
@@ -93,7 +94,7 @@ export function ProjectsRail() {
         </div>
       </div>
 
-      <div ref={pin} className="overflow-hidden pb-24 lg:flex lg:h-[100svh] lg:items-center lg:pb-0">
+      <div ref={pin} className="relative overflow-hidden pb-24 lg:flex lg:h-[100svh] lg:items-center lg:pb-0">
         <div
           ref={track}
           className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto px-[var(--gutter)] lg:snap-none lg:gap-8 lg:overflow-visible"
@@ -108,7 +109,7 @@ export function ProjectsRail() {
             <p className="mt-5 max-w-sm text-muted">Hail claims, metal retrofits, slate restorations — each with the numbers and the before &amp; after.</p>
           </div>
           {projects.map((p, i) => (
-            <Link key={p.slug} href={`/projects/${p.slug}`} className="group relative w-[78vw] shrink-0 snap-start sm:w-[46vw] lg:w-[34vw]">
+            <Link key={p.slug} href={`/projects/${p.slug}`} data-rail-card={i} className="group relative w-[78vw] shrink-0 snap-start sm:w-[46vw] lg:w-[34vw]">
               <ViewTransition name={`project-${p.slug}`} share="morph" default="none">
                 <div className="relative aspect-[4/5] overflow-hidden bg-stone-3 transition-[clip-path] duration-700 ease-[var(--ease-out-expo)] [clip-path:polygon(0_12%,50%_0,100%_12%,100%_100%,0_100%)] group-hover:[clip-path:polygon(0_0,50%_0,100%_0,100%_100%,0_100%)]">
                   <div data-card-img className="absolute inset-[-6%]">
@@ -134,6 +135,7 @@ export function ProjectsRail() {
           ))}
           <div className="w-[2vw] shrink-0" aria-hidden />
         </div>
+        <RoofMeter scope={pin} count={projects.length} className="wrap mt-8 lg:absolute lg:inset-x-0 lg:bottom-3 lg:mt-0 lg:justify-end" />
       </div>
     </section>
   );

@@ -1,6 +1,7 @@
 import type { Faq } from "@/content/faqs";
 import { Reveal, SplitReveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
+import { Gutter } from "@/components/fx/Gutter";
 
 export function FaqItems({ items }: { items: Faq[] }) {
   return (
@@ -38,7 +39,8 @@ export function FaqSection({ items, title = "Straight answers.", theme = "theme-
             </Button>
           </Reveal>
         </div>
-        <div className="lg:col-span-8">
+        <div className="relative lg:col-span-8">
+          <Gutter />
           <FaqItems items={items} />
         </div>
       </div>

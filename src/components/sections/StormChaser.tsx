@@ -2,6 +2,7 @@ import Image from "next/image";
 import { photos } from "@/lib/photos";
 import { stormChaserFlags } from "@/content/company";
 import { Parallax, Reveal, SplitReveal } from "@/components/ui/Reveal";
+import { ChalkLine } from "@/components/fx/ChalkLine";
 
 /** "How to spot a storm chaser" — red flags vs. the Halden way. */
 export function StormChaser() {
@@ -31,7 +32,7 @@ export function StormChaser() {
           </div>
           <Reveal as="ol" stagger={0.08}>
             {stormChaserFlags.map((f, i) => (
-              <li key={f.flag} className="grid gap-3 border-b border-line py-6 md:grid-cols-2 md:gap-6 md:py-8">
+              <li key={f.flag} className="relative grid gap-3 border-b border-line py-6 md:grid-cols-2 md:gap-6 md:py-8">
                 <p className="flex gap-4">
                   <span className="t-eyebrow pt-1.5 text-faint">0{i + 1}</span>
                   <span className="relative text-[1.08rem] font-semibold">
@@ -46,6 +47,7 @@ export function StormChaser() {
                     {f.halden}
                   </span>
                 </p>
+                <ChalkLine delay={i * 0.08} />
               </li>
             ))}
           </Reveal>
