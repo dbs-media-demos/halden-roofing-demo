@@ -3,6 +3,7 @@ import { photos } from "@/lib/photos";
 import { stats, badges } from "@/content/company";
 import { Counter, Parallax, Reveal, ScrubWords } from "@/components/ui/Reveal";
 import { Mark } from "@/components/brand/Logo";
+import { RoofBuild } from "@/components/fx/RoofBuild";
 import { defaultBiz } from "@/lib/biz";
 import { openDays, type Biz } from "@/lib/biz-core";
 
@@ -57,7 +58,9 @@ export function Intro({ biz = defaultBiz }: { biz?: Biz }) {
           </div>
         </div>
 
-        <Reveal stagger={0.08} className="mt-24 grid grid-cols-2 gap-px border-y border-line bg-line md:grid-cols-4">
+        {/* the stats are the house; its roof installs itself on scroll */}
+        <RoofBuild className="mt-24" />
+        <Reveal stagger={0.08} className="grid grid-cols-2 gap-px border-b border-line bg-line md:grid-cols-4">
           {statList.map((s) => (
             <div key={s.label} className="bg-stone py-8 md:px-6 md:py-10">
               <p className="font-display text-[clamp(2.4rem,4.6vw,4.4rem)] font-black leading-none tracking-[-0.05em]">

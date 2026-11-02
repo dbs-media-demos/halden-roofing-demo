@@ -605,6 +605,25 @@ html.lenis body {
   animation: course-in 520ms var(--ease-out-expo) both;
 }
 
+/* Services inspection laser: the band it has just passed reads as a thermal scan
+   (copper hue on the luminance below, so stone type glows and ink stays dark). */
+.scan-glow {
+  background: linear-gradient(to top, rgba(217, 138, 82, 0.95), rgba(217, 138, 82, 0.35) 45%, transparent);
+  mix-blend-mode: color;
+}
+.scan-spark {
+  background: linear-gradient(90deg, transparent 44%, #ffe2c8 50%, transparent 56%);
+  animation: laser-run 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes laser-run {
+  from {
+    transform: translateX(-56%);
+  }
+  to {
+    transform: translateX(56%);
+  }
+}
+
 @keyframes sweep-x {
   from {
     transform: translateX(-60px);

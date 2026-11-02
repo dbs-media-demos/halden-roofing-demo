@@ -13,6 +13,8 @@
 - Signature features:
   - Roofline hero: drone film seen through a house-shaped window (true 6/12 pitch) that opens to full-bleed on scroll while the headline splits apart
   - "Storm damage? Here's exactly what happens": sticky illustrated house; the sky turns from hail storm to golden hour, hail bounces off the roof (canvas), damage gets circled, a test square appears, the new roof installs course by course, a magnet sweeper rolls past, a warranty seal lands
+  - "The Halden way": a long Texas hip roof over the stats installs itself on scroll (chalk lines snap, shingles drop course by course in a stair-step, ridge capped, copper drip edge), then sunlight glints across it and the pointer lifts shingles like wind (canvas)
+  - "Everything overhead": an inspection laser scans down the service list with the scroll, the band it passes glows thermal copper, each service is ticked off and the last one stamps "Roof check complete"
   - Material explorer: re-roof the house in asphalt, standing-seam metal, clay tile or slate (course-by-course wipe), swatches recolour it, specs count to new values
   - Draggable, keyboard-accessible before/after sliders with a roof-shaped handle on every case study
   - Hail-season banner + 3-step free-inspection form with photo upload preview, validation and a "We'll call within 2 hours" success state
