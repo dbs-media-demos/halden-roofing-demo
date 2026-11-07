@@ -1618,6 +1618,10 @@ input.range::-moz-range-thumb {
   }
 
   /* ── Storm chaser ── */
+  /* A grid column grows to fit its content: without this the rail stretches the whole page instead of scrolling */
+  .ph-chaser-col {
+    min-width: 0;
+  }
   .ph-wide {
     aspect-ratio: 5 / 2;
   }

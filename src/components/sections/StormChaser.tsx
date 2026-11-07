@@ -25,7 +25,7 @@ export function StormChaser() {
           </Parallax>
         </div>
 
-        <div className="lg:col-span-7 lg:pt-6">
+        <div className="ph-chaser-col lg:col-span-7 lg:pt-6">
           <div className="ph-hide hidden grid-cols-2 gap-6 border-b border-line pb-4 md:grid">
             <p className="t-eyebrow text-muted">Red flag</p>
             <p className="t-eyebrow text-accent">The Halden way</p>
