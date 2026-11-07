@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
-import { isCoarse, prefersReducedMotion } from "@/lib/gsap";
+import { isCoarse, isPhone, prefersReducedMotion } from "@/lib/gsap";
 
 type P = { x: number; y: number; vx: number; vy: number; r: number; bounced: number; life: number };
 
@@ -26,7 +26,7 @@ export function HailCanvas({ active, svgRef, className }: { active: boolean; svg
 
   useEffect(() => {
     const cv = canvas.current;
-    if (!cv || prefersReducedMotion()) return;
+    if (!cv || prefersReducedMotion() || isPhone()) return;
     const ctx = cv.getContext("2d");
     if (!ctx) return;
 

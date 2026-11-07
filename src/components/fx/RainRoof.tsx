@@ -47,7 +47,7 @@ export function RainRoof() {
   }, root);
 
   return (
-    <div ref={root} aria-hidden className="pointer-events-none absolute inset-x-0 bottom-full h-6 lg:h-9">
+    <div ref={root} aria-hidden className="fx-desk pointer-events-none absolute inset-x-0 bottom-full h-6 lg:h-9">
       <svg viewBox="0 0 100 24" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible">
         <polygon points="0,24 50,0 100,24" fill="var(--ink)" />
         <polyline points="0,24 50,0 100,24" fill="none" stroke="var(--copper)" strokeWidth="3" vectorEffect="non-scaling-stroke" />

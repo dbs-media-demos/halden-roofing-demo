@@ -54,7 +54,7 @@ export function Neighborhood() {
       aria-hidden
       viewBox="0 0 1200 90"
       preserveAspectRatio="xMidYMax slice"
-      className="pointer-events-none absolute inset-x-0 bottom-0 h-[64px] w-full md:h-[96px]"
+      className="fx-desk pointer-events-none absolute inset-x-0 bottom-0 h-[64px] w-full md:h-[96px]"
     >
       <line x1="0" x2="1200" y1="89.5" y2="89.5" stroke="var(--stone)" strokeOpacity="0.12" />
       {HOUSES.map((hs, i) => {

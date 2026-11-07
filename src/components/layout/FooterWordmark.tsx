@@ -32,7 +32,7 @@ export function FooterWordmark() {
 
   return (
     <div ref={ref} aria-hidden className="wrap mt-16 select-none overflow-hidden">
-      <div className="flex justify-between font-display text-[19.5vw] font-black leading-[0.8] tracking-[-0.06em] md:text-[18.5vw]">
+      <div className="ph-wordmark flex justify-between font-display text-[19.5vw] font-black leading-[0.8] tracking-[-0.06em] md:text-[18.5vw]" style={{ "--n": word.length } as React.CSSProperties}>
         {word.split("").map((l, i) => (
           <span
             key={i}

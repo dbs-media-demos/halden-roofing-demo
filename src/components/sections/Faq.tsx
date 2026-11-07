@@ -27,7 +27,7 @@ export function FaqItems({ items }: { items: Faq[] }) {
 export function FaqSection({ items, title = "Straight answers.", theme = "theme-stone" }: { items: Faq[]; title?: string; theme?: string }) {
   return (
     <section aria-labelledby="faq-title" className={`${theme} relative py-24 md:py-36`}>
-      <div className="wrap grid gap-12 lg:grid-cols-12">
+      <div className="ph-faq wrap grid gap-12 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <p className="t-eyebrow text-accent">FAQ</p>
           <SplitReveal id="faq-title" className="t-h2 mt-5">

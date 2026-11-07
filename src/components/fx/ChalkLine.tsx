@@ -42,7 +42,7 @@ export function ChalkLine({ delay = 0 }: { delay?: number }) {
   }, root);
 
   return (
-    <span ref={root} aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-[6px] h-3">
+    <span ref={root} aria-hidden className="fx-desk pointer-events-none absolute inset-x-0 -bottom-[6px] h-3">
       <svg viewBox="0 0 1000 12" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible">
         <path d="M0 6 Q 500 6 1000 6" fill="none" stroke="#b5482e" strokeOpacity="0.6" strokeWidth="1.5" strokeDasharray="5 2.5" vectorEffect="non-scaling-stroke" />
       </svg>

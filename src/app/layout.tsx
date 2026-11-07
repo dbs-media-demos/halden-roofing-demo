@@ -26,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-US" className={fontVariables} suppressHydrationWarning>
       <body className="theme-ink min-h-screen">
+        <link rel="preload" href="/fonts/ibm-plex-mono-500-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" media="(min-width: 768px) and (pointer: fine)" />
         <a
           href="#main"
           className="t-eyebrow fixed left-4 top-4 z-[300] -translate-y-24 rounded-full bg-copper px-5 py-3 text-ink focus:translate-y-0"

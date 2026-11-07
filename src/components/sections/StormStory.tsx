@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { HouseArt } from "@/components/house/HouseArt";
 import { HailCanvas } from "@/components/fx/HailCanvas";
 import { stormSteps } from "@/content/company";
-import { ScrollTrigger, useIdleGSAP } from "@/lib/gsap";
+import { ScrollTrigger, isPhone, useIdleGSAP } from "@/lib/gsap";
 import { SplitReveal, Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 
@@ -48,7 +48,25 @@ const hits: [number, number][] = [
 export function StormStory() {
   const root = useRef<HTMLElement>(null);
   const svg = useRef<SVGSVGElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
+
+  // Phones: nothing pinned, the steps simply stack. This is their one roofing touch: when the
+  // house comes into view the new roof goes on course by course and the warranty seal lands, once.
+  useEffect(() => {
+    const el = stage.current;
+    if (!el || !isPhone()) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        setStep(stormSteps.length - 1);
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useIdleGSAP(
     () => {
@@ -88,7 +106,7 @@ export function StormStory() {
 
         <div className="relative mt-14 grid gap-10 lg:grid-cols-12">
           {/* Sticky stage */}
-          <div className="sticky top-2 z-10 h-[44svh] lg:top-[calc(var(--header-h)+1.5rem)] lg:col-span-7 lg:h-[calc(100svh-var(--header-h)-3rem)]">
+          <div ref={stage} data-ph-stage className="sticky top-2 z-10 h-[44svh] lg:top-[calc(var(--header-h)+1.5rem)] lg:col-span-7 lg:h-[calc(100svh-var(--header-h)-3rem)]">
             <div className="relative h-full overflow-hidden rounded-[2px] border border-line">
               {skies.map((s, i) => (
                 <div
@@ -128,7 +146,7 @@ export function StormStory() {
                 ))}
               </svg>
 
-              <div className="absolute bottom-0 left-1/2 w-[112%] -translate-x-1/2 md:w-[104%]">
+              <div className="ph-stage-house absolute bottom-0 left-1/2 w-[112%] -translate-x-1/2 md:w-[104%]">
                 <HouseArt
                   svgRef={svg}
                   base={OLD}
@@ -207,13 +225,13 @@ export function StormStory() {
                 </HouseArt>
               </div>
 
-              <HailCanvas active={step === 0} svgRef={svg} className="pointer-events-none absolute inset-0 h-full w-full" />
+              <HailCanvas active={step === 0} svgRef={svg} className="fx-desk pointer-events-none absolute inset-0 h-full w-full" />
 
               {/* camera flash for the photo report */}
               <div aria-hidden className={clsx("pointer-events-none absolute inset-0 bg-white opacity-0", step === 1 && "[animation:flash_2.4s_linear_infinite]")} />
 
               {/* HUD */}
-              <div className="absolute inset-x-0 top-0 flex items-start justify-between p-4 md:p-6">
+              <div className="ph-hide absolute inset-x-0 top-0 flex items-start justify-between p-4 md:p-6">
                 <p className="font-display text-[clamp(2.4rem,5vw,4.8rem)] font-black leading-none tracking-[-0.05em] text-stone" aria-hidden>
                   0{step + 1}
                   <span className="text-stone/35">/07</span>
@@ -241,21 +259,21 @@ export function StormStory() {
                 key={s.title}
                 data-step
                 className={clsx(
-                  "flex min-h-[78svh] flex-col justify-end border-l pb-[8svh] pl-6 pt-10 transition-[border-color,opacity] duration-700 md:pl-10 lg:min-h-[78vh] lg:justify-center lg:py-10",
+                  "ph-step flex min-h-[78svh] flex-col justify-end border-l pb-[8svh] pl-6 pt-10 transition-[border-color,opacity] duration-700 md:pl-10 lg:min-h-[78vh] lg:justify-center lg:py-10",
                   i === step ? "border-copper" : "border-line",
                 )}
               >
                 <p className="t-eyebrow text-accent">
                   Step 0{i + 1} · {s.time}
                 </p>
-                <h3 className={clsx("t-h2 mt-4 !text-[clamp(1.8rem,3.2vw,3.2rem)] transition-colors duration-700", i === step ? "text-stone" : "text-stone/55")}>{s.title}</h3>
+                <h3 className={clsx("t-h2 mt-4 !text-[length:var(--step-h,clamp(1.8rem,3.2vw,3.2rem))] transition-colors duration-700", i === step ? "text-stone" : "text-stone/55")}>{s.title}</h3>
                 <p className="t-lead mt-5 max-w-md text-muted">{s.text}</p>
               </li>
             ))}
           </ol>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-line pt-10">
+        <div className="ph-storm-cta mt-6 flex flex-wrap items-center gap-4 border-t border-line pt-10">
           <Button href="/free-inspection" size="lg">
             Start with step one — it&rsquo;s free
           </Button>

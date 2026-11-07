@@ -20,17 +20,17 @@ export function StormChaser() {
               Here&rsquo;s what to watch for — whoever you hire.
             </p>
           </Reveal>
-          <Parallax className="mt-10 aspect-[4/3] w-full lg:aspect-[4/5]">
+          <Parallax className="ph-wide mt-10 aspect-[4/3] w-full lg:aspect-[4/5]">
             <Image src={photos["hail-hand"]} alt="A hand holding hailstones after a North Texas storm" fill sizes="(min-width: 1024px) 38vw, 100vw" className="object-cover" />
           </Parallax>
         </div>
 
         <div className="lg:col-span-7 lg:pt-6">
-          <div className="hidden grid-cols-2 gap-6 border-b border-line pb-4 md:grid">
+          <div className="ph-hide hidden grid-cols-2 gap-6 border-b border-line pb-4 md:grid">
             <p className="t-eyebrow text-muted">Red flag</p>
             <p className="t-eyebrow text-accent">The Halden way</p>
           </div>
-          <Reveal as="ol" stagger={0.08}>
+          <Reveal as="ol" stagger={0.08} className="ph-rail ph-cards">
             {stormChaserFlags.map((f, i) => (
               <li key={f.flag} className="relative grid gap-3 border-b border-line py-6 md:grid-cols-2 md:gap-6 md:py-8">
                 <p className="flex gap-4">
@@ -51,7 +51,7 @@ export function StormChaser() {
               </li>
             ))}
           </Reveal>
-          <Reveal className="mt-10 flex items-start gap-5 rounded-[2px] bg-ink p-6 text-stone md:p-8">
+          <Reveal className="ph-law mt-10 flex items-start gap-5 rounded-[2px] bg-ink p-6 text-stone md:p-8">
             <span className="font-display text-5xl font-black leading-none text-copper">!</span>
             <p>
               <strong className="font-bold">Texas law is on your side.</strong>{" "}

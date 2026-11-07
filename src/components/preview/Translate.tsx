@@ -8,8 +8,8 @@ const norm = (s: string) => s.replace(/\s+/g, " ").trim();
 /**
  * Serbian previews of a site written in English: after hydration every text node and label
  * whose (trimmed) text is in `dict` is swapped for its translation, and a MutationObserver keeps
- * doing it as the page changes (tabs, sliders, typed text). The page stays hidden until the
- * first pass (translateGateCss), so nobody sees English flash by. Text carrying the business's own
+ * doing it as the page changes (tabs, sliders, typed text). First-screen lines are written
+ * per business in the components, so nothing visible needs the pass and the page is never hidden. Text carrying the business's own
  * name or numbers isn't in the dictionary and stays as it is.
  */
 export function Translate({ dict }: { dict: Record<string, string> }) {
@@ -46,7 +46,6 @@ export function Translate({ dict }: { dict: Record<string, string> }) {
       }
     };
     walk(document.body);
-    document.documentElement.classList.add("tr-ready");
     const mo = new MutationObserver((list) => {
       for (const m of list) {
         if (m.type === "characterData") text(m.target);
@@ -59,9 +58,6 @@ export function Translate({ dict }: { dict: Record<string, string> }) {
   }, [dict]);
   return null;
 }
-
-/** Hide the page until the first translation pass; show it anyway after 2.5 s if JS fails. */
-export const translateGateCss = "html:not(.tr-ready) body{opacity:0;animation:tr-reveal 0s 2.5s forwards}@keyframes tr-reveal{to{opacity:1}}";
 
 /**
  * Dev helper: every visible English fragment on the page that the dictionary doesn't cover yet.

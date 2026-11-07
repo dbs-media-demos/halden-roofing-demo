@@ -22,8 +22,8 @@ export function Footer({ biz = defaultBiz }: { biz?: Biz }) {
   return (
     <footer className="theme-ink relative overflow-hidden border-t border-line pb-28 pt-20 md:pb-10">
       <div className="wrap">
-        <div className="grid gap-12 md:grid-cols-12">
-          <div className="md:col-span-4">
+        <div className="ph-foot grid gap-12 md:grid-cols-12">
+          <div className="ph-foot-brand md:col-span-4">
             <Mark className="h-14 w-14" />
             <p className="t-h3 mt-6 max-w-sm">Built for the next storm. Here for the one after that.</p>
             <div className="mt-8 flex flex-col gap-2 text-[0.98rem]">
@@ -65,7 +65,7 @@ export function Footer({ biz = defaultBiz }: { biz?: Biz }) {
             </ul>
           </nav>
 
-          <nav aria-label="Company" className="md:col-span-3">
+          <nav aria-label="Company" className="ph-foot-company md:col-span-3">
             <p className="t-eyebrow text-faint">Company</p>
             <ul className="mt-5 flex flex-col gap-2.5">
               {company.map((l) => (
@@ -76,7 +76,7 @@ export function Footer({ biz = defaultBiz }: { biz?: Biz }) {
                 </li>
               ))}
             </ul>
-            <div className="mt-8 border-t border-line pt-6">
+            <div className="ph-foot-hours mt-8 border-t border-line pt-6">
               <OpenBadge className="text-stone" />
               <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-sm">
                 {biz.preview

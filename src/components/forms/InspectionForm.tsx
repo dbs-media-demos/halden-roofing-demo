@@ -4,7 +4,8 @@ import { useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent, t
 import clsx from "clsx";
 import { ChoiceGroup, SelectField, TextField } from "./Field";
 import { cities } from "@/content/cities";
-import { site, telHref } from "@/lib/site";
+import { useBiz } from "@/components/preview/BizContext";
+import { telOf } from "@/lib/biz-core";
 
 type Data = {
   issue: string;
@@ -76,6 +77,7 @@ const formatPhone = (v: string) => {
  * inline validation and a success state promising a callback within 2 hours.
  */
 export function InspectionForm({ compact }: { compact?: boolean }) {
+  const biz = useBiz();
   const uid = useId();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<Data>(empty);
@@ -140,7 +142,7 @@ export function InspectionForm({ compact }: { compact?: boolean }) {
         <p className="t-eyebrow mt-8 text-accent">Request {done} received</p>
         <h3 className="t-h2 mt-4">We&rsquo;ll call within 2 hours.</h3>
         <p className="t-lead mt-5 max-w-xl text-muted">
-          Thanks{data.name ? `, ${data.name.split(" ")[0]}` : ""}. A Halden inspector will call {data.phone} this {data.time.toLowerCase()} to book a time that
+          Thanks{data.name ? `, ${data.name.split(" ")[0]}` : ""}. {biz.preview ? `An inspector from ${biz.shortName}` : "A Halden inspector"} will call {data.phone} this {data.time.toLowerCase()} to book a time that
           suits you. {files.length > 0 && `We've attached your ${files.length} photo${files.length > 1 ? "s" : ""} to the request.`}
         </p>
         <ol className="mt-10 grid gap-px overflow-hidden rounded-[2px] bg-line md:grid-cols-3">
@@ -158,8 +160,8 @@ export function InspectionForm({ compact }: { compact?: boolean }) {
         </ol>
         <p className="mt-8 text-sm text-muted">
           Leaking right now? Call{" "}
-          <a href={telHref} className="font-semibold text-stone underline underline-offset-4">
-            {site.phoneDisplay}
+          <a href={telOf(biz)} className="font-semibold text-stone underline underline-offset-4">
+            {biz.phoneDisplay}
           </a>{" "}
           for same-day tarping.
         </p>
@@ -196,16 +198,20 @@ export function InspectionForm({ compact }: { compact?: boolean }) {
           <>
             <TextField label="Street address" name="street" autoComplete="street-address" value={data.street} onChange={onInput("street")} error={errors.street} placeholder="1234 Main St" />
             <div className="grid gap-5 sm:grid-cols-[1fr_10rem]">
-              <SelectField label="City" name="city" value={data.city} onChange={onInput("city")} error={errors.city}>
-                <option value="">Choose…</option>
-                {cities.map((c) => (
-                  <option key={c.slug} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-                <option value="Other">Other (nearby)</option>
-              </SelectField>
-              <TextField label="ZIP" name="zip" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={data.zip} onChange={onInput("zip")} error={errors.zip} placeholder="76109" />
+              {biz.preview ? (
+                <TextField label="City" name="city" autoComplete="address-level2" value={data.city} onChange={onInput("city")} error={errors.city} placeholder={biz.area} />
+              ) : (
+                <SelectField label="City" name="city" value={data.city} onChange={onInput("city")} error={errors.city}>
+                  <option value="">Choose…</option>
+                  {cities.map((c) => (
+                    <option key={c.slug} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                  <option value="Other">Other (nearby)</option>
+                </SelectField>
+              )}
+              <TextField label="ZIP" name="zip" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={data.zip} onChange={onInput("zip")} error={errors.zip} placeholder={biz.preview ? biz.address.postal : "76109"} />
             </div>
             <div>
               <p className="t-eyebrow mb-2 flex justify-between text-muted">
@@ -263,7 +269,7 @@ export function InspectionForm({ compact }: { compact?: boolean }) {
           <>
             <div className="grid gap-5 sm:grid-cols-2">
               <TextField label="Your name" name="name" autoComplete="name" value={data.name} onChange={onInput("name")} error={errors.name} />
-              <TextField label="Phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" value={data.phone} onChange={onInput("phone")} error={errors.phone} placeholder="(817) 555-0100" />
+              <TextField label="Phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" value={data.phone} onChange={onInput("phone")} error={errors.phone} placeholder={biz.preview ? "(555) 555-0100" : "(817) 555-0100"} />
             </div>
             <TextField label="Email" name="email" type="email" autoComplete="email" value={data.email} onChange={onInput("email")} error={errors.email} optional hint="For your photo report." />
             <ChoiceGroup legend="Best time to call" name="time" options={times} value={data.time} onChange={set("time")} error={errors.time} columns={3} />

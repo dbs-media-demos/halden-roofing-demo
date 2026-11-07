@@ -38,7 +38,7 @@ export function PreviewMap({ biz }: { biz: Biz }) {
           </Reveal>
         </div>
         <Reveal className="lg:col-span-7">
-          <div className="relative aspect-square overflow-hidden rounded-[2px] border border-line sm:aspect-[4/3]">
+          <div className="ph-gmap relative aspect-square overflow-hidden rounded-[2px] border border-line sm:aspect-[4/3]">
             <iframe src={embed} title={`Map: ${query}`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="absolute inset-0 h-full w-full border-0" />
             <Drone />
           </div>

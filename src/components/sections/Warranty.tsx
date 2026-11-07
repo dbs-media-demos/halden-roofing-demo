@@ -25,7 +25,7 @@ export function Warranty({ showFinancing = true, headingAs = "h2" }: { showFinan
           </Reveal>
         </div>
 
-        <Reveal stagger={0.1} className="mt-14 grid gap-5 max-lg:gap-y-11 lg:grid-cols-3 lg:items-stretch">
+        <Reveal stagger={0.1} className="ph-rail ph-tiers mt-14 grid gap-5 max-lg:gap-y-11 lg:grid-cols-3 lg:items-stretch">
           {warrantyTiers.map((t) => (
             <article
               key={t.id}
@@ -54,7 +54,7 @@ export function Warranty({ showFinancing = true, headingAs = "h2" }: { showFinan
         </Reveal>
 
         {showFinancing && (
-          <Reveal className="mt-20 grid gap-8 border-t border-line pt-12 md:grid-cols-12 md:items-center">
+          <Reveal className="ph-fin mt-20 grid gap-8 border-t border-line pt-12 md:grid-cols-12 md:items-center">
             <p className="font-display leading-none tracking-[-0.05em] md:col-span-5">
               <span className="block text-[0.95rem] font-semibold uppercase tracking-[0.02em] text-muted">New roofs from</span>
               <span className="text-[clamp(4.5rem,11vw,10rem)] font-black">${site.financingFrom}</span>

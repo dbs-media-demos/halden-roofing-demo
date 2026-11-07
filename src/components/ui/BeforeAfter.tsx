@@ -3,7 +3,7 @@
 import Image, { type StaticImageData } from "next/image";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import clsx from "clsx";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, loadGsap, prefersReducedMotion, isPhone } from "@/lib/gsap";
 
 type Props = {
   before: StaticImageData;
@@ -40,7 +40,8 @@ export function BeforeAfter({ before, after, beforeAlt, afterAlt, className, siz
   const onDown = (e: PointerEvent) => {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     setDragging(true);
-    fromPointer(e.clientX);
+    // A finger resting on the photo may be starting a scroll: only a sideways drag moves the line
+    if (e.pointerType !== "touch") fromPointer(e.clientX);
   };
   const onMove = (e: PointerEvent) => dragging && fromPointer(e.clientX);
   const onUp = () => setDragging(false);
@@ -62,17 +63,19 @@ export function BeforeAfter({ before, after, beforeAlt, afterAlt, className, siz
   // One-time nudge so people notice it moves.
   useEffect(() => {
     const el = box.current;
-    if (!el || prefersReducedMotion()) return;
+    if (!el || prefersReducedMotion() || isPhone()) return;
     const io = new IntersectionObserver(
       ([e]) => {
         if (!e.isIntersecting) return;
         io.disconnect();
         const o = { v: 50 };
-        gsap
-          .timeline({ delay: 0.3 })
-          .to(o, { v: 28, duration: 0.9, ease: "power2.inOut", onUpdate: () => set(o.v) })
-          .to(o, { v: 68, duration: 1.1, ease: "power2.inOut", onUpdate: () => set(o.v) })
-          .to(o, { v: 50, duration: 0.8, ease: "power2.inOut", onUpdate: () => set(o.v) });
+        loadGsap().then(() =>
+          gsap
+            .timeline({ delay: 0.3 })
+            .to(o, { v: 28, duration: 0.9, ease: "power2.inOut", onUpdate: () => set(o.v) })
+            .to(o, { v: 68, duration: 1.1, ease: "power2.inOut", onUpdate: () => set(o.v) })
+            .to(o, { v: 50, duration: 0.8, ease: "power2.inOut", onUpdate: () => set(o.v) }),
+        );
       },
       { threshold: 0.6 },
     );

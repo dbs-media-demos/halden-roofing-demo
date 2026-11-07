@@ -6,10 +6,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { Logo } from "@/components/brand/Logo";
+import type { ServiceNavItem } from "./SiteChrome";
 import { Button, PhoneIcon } from "@/components/ui/Button";
 import { OpenBadge } from "@/components/ui/OpenBadge";
-import { services } from "@/content/services";
-import { photos } from "@/lib/photos";
 import { useBiz } from "@/components/preview/BizContext";
 import { telOf } from "@/lib/biz-core";
 import { useDismissed } from "@/lib/session-flag";
@@ -24,7 +23,7 @@ const links = [
 
 const BANNER_KEY = "halden-hail-banner";
 
-export function Header() {
+export function Header({ services }: { services: ServiceNavItem[] }) {
   const biz = useBiz();
   const telHref = telOf(biz) ?? "";
   const pathname = usePathname();
@@ -79,16 +78,18 @@ export function Header() {
 
   return (
     <header
+      data-lift={!bannerDismissed && scrolled && !hidden && !menuOpen ? "1" : undefined}
       className={clsx(
-        "theme-ink fixed inset-x-0 top-0 z-[80] !bg-transparent transition-transform duration-500 ease-[var(--ease-out-expo)]",
+        "site-header theme-ink fixed inset-x-0 top-0 z-[80] !bg-transparent transition-transform duration-500 ease-[var(--ease-out-expo)]",
         hidden && !menuOpen && !megaOpen && "-translate-y-full",
       )}
       style={{ viewTransitionName: "site-header" }}
     >
       {/* Hail-season banner */}
       <div
+        data-banner={bannerDismissed || menuOpen ? "off" : "on"}
         className={clsx(
-          "grid overflow-hidden bg-copper text-ink transition-[grid-template-rows] duration-500 ease-[var(--ease-out-expo)]",
+          "site-banner grid overflow-hidden bg-copper text-ink transition-[grid-template-rows] duration-500 ease-[var(--ease-out-expo)]",
           showBanner ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
         inert={!showBanner}
@@ -99,7 +100,7 @@ export function Header() {
               <HailIcon />
               <span>
                 Hail season is here.{" "}
-                <span className="hidden sm:inline">Free roof inspections across Tarrant County, booked within 48 hours.</span>
+                <span className="hidden sm:inline">{biz.preview ? "Free roof inspections, booked within 48 hours." : "Free roof inspections across Tarrant County, booked within 48 hours."}</span>
               </span>
             </p>
             <div className="flex items-center gap-1">
@@ -125,8 +126,8 @@ export function Header() {
       {/* Main bar */}
       <div
         className={clsx(
-          "relative transition-[background-color,backdrop-filter,border-color] duration-500",
-          scrolled || megaOpen ? "border-b border-line bg-ink/82 backdrop-blur-xl" : "border-b border-transparent",
+          "relative transition-[background-color,border-color] duration-500",
+          scrolled || megaOpen ? "border-b border-line bg-ink" : "border-b border-transparent",
         )}
       >
         <div className="wrap flex h-[var(--header-h)] items-center justify-between gap-6">
@@ -198,7 +199,7 @@ export function Header() {
           onMouseEnter={openMega}
           onMouseLeave={closeMega}
           className={clsx(
-            "absolute inset-x-0 top-full hidden border-b border-line bg-ink/95 backdrop-blur-xl transition-[opacity,transform,visibility] duration-500 ease-[var(--ease-out-expo)] lg:block",
+            "absolute inset-x-0 top-full hidden border-b border-line bg-ink transition-[opacity,transform,visibility] duration-500 ease-[var(--ease-out-expo)] lg:block",
             megaOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-3 opacity-0",
           )}
         >
@@ -212,7 +213,7 @@ export function Header() {
               >
                 <div className={clsx("relative overflow-hidden bg-slate", i === 0 ? "h-full min-h-72" : "aspect-[16/8]")}>
                   <Image
-                    src={photos[s.hero]}
+                    src={s.photo}
                     alt=""
                     fill
                     sizes="25vw"

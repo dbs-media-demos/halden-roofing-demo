@@ -129,7 +129,7 @@ export function ServiceMap({ activeSlug, headingAs = "h2", heading = "Twelve min
               within 48 hours, and still here when your warranty matters.
             </p>
           </Reveal>
-          <ul className="mt-10 border-t border-line" onMouseLeave={() => setHover(activeSlug ?? null)}>
+          <ul className="ph-cities mt-10 border-t border-line" onMouseLeave={() => setHover(activeSlug ?? null)}>
             {cities.map((c) => (
               <li key={c.slug} className="border-b border-line">
                 <Link
@@ -149,7 +149,7 @@ export function ServiceMap({ activeSlug, headingAs = "h2", heading = "Twelve min
             ))}
           </ul>
         </div>
-        <Reveal className="lg:col-span-7">{map}</Reveal>
+        <Reveal className="ph-map lg:col-span-7">{map}</Reveal>
       </div>
     </section>
   );

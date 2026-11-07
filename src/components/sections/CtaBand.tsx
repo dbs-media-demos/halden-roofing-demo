@@ -26,7 +26,7 @@ export function CtaBand({
       </Parallax>
       <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/20" />
       <RoofFlashing />
-      <div className="wrap relative py-28 md:py-44">
+      <div className="ph-cta wrap relative py-28 md:py-44">
         <OpenBadge className="text-stone/80" />
         <SplitReveal id="cta-title" className="t-h1 mt-6 max-w-5xl text-stone">
           {title}

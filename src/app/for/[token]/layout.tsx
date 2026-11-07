@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { BizProvider } from "@/components/preview/BizContext";
 import { PreviewGuard } from "@/components/preview/PreviewGuard";
-import { Translate, translateGateCss } from "@/components/preview/Translate";
+import { Translate } from "@/components/preview/Translate";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { previewBiz } from "@/lib/preview";
 import { sr } from "@/i18n/sr";
@@ -22,12 +22,7 @@ export default async function PreviewLayout({ children, params }: { children: Re
   const dict = biz.lang === "sr" ? sr : enPreview;
   return (
     <BizProvider biz={biz}>
-      {(biz.lang === "sr" || Object.keys(dict).length > 0) && (
-        <>
-          <style>{translateGateCss}</style>
-          <Translate dict={dict} />
-        </>
-      )}
+      {Object.keys(dict).length > 0 && <Translate dict={dict} />}
       <SiteChrome biz={biz}>{children}</SiteChrome>
       <PreviewGuard />
     </BizProvider>

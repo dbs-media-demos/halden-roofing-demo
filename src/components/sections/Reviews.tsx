@@ -69,7 +69,7 @@ export function Reviews({ biz = defaultBiz }: { biz?: Biz }) {
           </SplitReveal>
         </div>
         {biz.rating && (
-          <Reveal className="flex items-end gap-6 md:col-span-5 md:justify-end">
+          <Reveal className="ph-rating flex items-end gap-6 md:col-span-5 md:justify-end">
             <p className="font-display text-[5.5rem] font-black leading-[0.8] tracking-[-0.06em]">{biz.rating.value}</p>
             <div>
               <Stars n={5} />
@@ -83,14 +83,28 @@ export function Reviews({ biz = defaultBiz }: { biz?: Biz }) {
       </div>
 
       {/* Accessible list for screen readers; the marquees are decorative duplicates. */}
-      <ul className="sr-only">
+      <ul className="ph-hide sr-only">
         {reviews.slice(0, 6).map((r) => (
           <li key={r.author}>
             {r.author}, {area ?? r.city}: {shortName ? scrubReview(r.text, shortName) : r.text}
           </li>
         ))}
       </ul>
-      <div className="mt-16 flex flex-col gap-5" aria-hidden>
+      {/* Phones: the first reviews in full, the rest a swipe away */}
+      <div className="ph-only wrap mt-5 flex flex-col gap-2.5">
+        {reviews.slice(0, 3).map((r) => (
+          <ReviewCard key={r.author} r={r} area={area} shortName={shortName} />
+        ))}
+      </div>
+      <div className="ph-only wrap mt-2.5">
+        <div data-rail className="ph-rail">
+          {reviews.slice(3).map((r) => (
+            <ReviewCard key={r.author} r={r} area={area} shortName={shortName} />
+          ))}
+        </div>
+      </div>
+
+      <div className="ph-hide mt-16 flex flex-col gap-5" aria-hidden>
         <Row items={reviews.slice(0, half)} area={area} shortName={shortName} hidden />
         <Row items={reviews.slice(half)} area={area} shortName={shortName} reverse hidden />
       </div>

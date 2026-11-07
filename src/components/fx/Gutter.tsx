@@ -45,7 +45,7 @@ export function Gutter() {
   }, root);
 
   return (
-    <div ref={root} aria-hidden className="pointer-events-none absolute inset-0">
+    <div ref={root} aria-hidden className="fx-desk pointer-events-none absolute inset-0">
       {/* gutter trough */}
       <span className="absolute -right-[13px] -top-[9px] left-0 h-[9px] overflow-hidden rounded-b-[5px] border-x border-b p-px" style={pipe}>
         <span ref={run} className="gutter-water fx-loop block h-full w-full origin-left rounded-b-[4px]" style={{ transform: "scaleX(0)" }} />

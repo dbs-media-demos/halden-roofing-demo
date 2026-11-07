@@ -101,7 +101,7 @@ export function ChoiceGroup({
   return (
     <fieldset aria-describedby={error ? `${name}-error` : undefined}>
       <legend className="t-eyebrow mb-3 text-muted">{legend}</legend>
-      <div className={clsx("grid gap-2", columns === 2 && "sm:grid-cols-2", columns === 3 && "grid-cols-2 sm:grid-cols-3", columns === 4 && "grid-cols-2 sm:grid-cols-4")}>
+      <div className={clsx("ph-choices grid gap-2", columns === 2 && "sm:grid-cols-2", columns === 3 && "grid-cols-2 sm:grid-cols-3", columns === 4 && "grid-cols-2 sm:grid-cols-4")}>
         {options.map((o) => {
           const on = value === o.value;
           return (

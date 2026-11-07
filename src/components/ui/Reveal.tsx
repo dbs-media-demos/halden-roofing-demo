@@ -225,5 +225,3 @@ export function Counter({ value, decimals = 0, suffix = "", className }: { value
     </span>
   );
 }
-
-export { ScrollTrigger };

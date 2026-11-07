@@ -14,6 +14,10 @@ npm run build && npm start
 `NEXT_PUBLIC_NOINDEX` defaults to noindex (robots meta, `X-Robots-Tag`, robots.txt disallow). Set it to `false` only for a real client site.
 `NEXT_PUBLIC_SITE_URL` defaults to `https://halden-roofing-demo.vercel.app`.
 
+## Phones
+
+Below 768 px or on a touch screen the homepage is a different cut of the same content, all in the "phone pass" block at the end of `src/app/globals.css` (section order, type, rails) and keyed on the same test as `isPhone()` in `src/lib/gsap.ts`. Pinned and scrubbed scenes become stacked sections. GSAP, Lenis, the hero film and IBM Plex Mono are desktop-only and phones never fetch them, so keep them behind `loadGsap()`, `useIdleGSAP` or `isPhone()`. Desktop (1024 px and up) doesn't use any of it.
+
 ## Where things live
 
 - `src/content/*` — all copy: services, projects, cities, reviews, FAQs, materials, company facts

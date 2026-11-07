@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import clsx from "clsx";
 import { HouseArt, type RoofLayer } from "@/components/house/HouseArt";
 import { materials, type MaterialId } from "@/content/materials";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, prefersReducedMotion, isPhone } from "@/lib/gsap";
 import { SplitReveal, Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 
@@ -14,7 +14,7 @@ function Tween({ value, className }: { value: number; className?: string }) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (prefersReducedMotion()) {
+    if (prefersReducedMotion() || isPhone() || !gsap) {
       el.textContent = String(value);
       last.current = value;
       return;
@@ -97,7 +97,7 @@ export function MaterialExplorer() {
 
         <div className="mt-14 grid gap-8 lg:grid-cols-12 lg:gap-10">
           {/* Stage */}
-          <div className="relative flex flex-col overflow-hidden rounded-[2px] lg:col-span-7">
+          <div className="ph-mat-stage relative flex flex-col overflow-hidden rounded-[2px] lg:col-span-7">
             <div className="absolute inset-0 bg-gradient-to-b from-[#86a8c2] via-[#b9cedc] to-[#e9e1d2]" />
             <div aria-hidden className="absolute -left-10 top-10 h-16 w-72 rounded-full bg-white/50 blur-2xl [animation:drift_24s_ease-in-out_infinite_alternate]" />
             <div aria-hidden className="absolute right-0 top-24 h-12 w-56 rounded-full bg-white/40 blur-2xl [animation:drift_30s_ease-in-out_infinite_alternate-reverse]" />
@@ -117,7 +117,7 @@ export function MaterialExplorer() {
                 </g>
               </HouseArt>
             </div>
-            <div className="relative flex items-center justify-between border-t border-ink/10 bg-stone/70 px-5 py-3 text-ink backdrop-blur">
+            <div className="ph-mat-label relative flex items-center justify-between border-t border-ink/10 bg-stone/70 px-5 py-3 text-ink backdrop-blur">
               <span className="t-spec">{mat.name}</span>
               <span className="t-spec flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full border border-ink/30" style={{ background: color }} />
@@ -128,7 +128,7 @@ export function MaterialExplorer() {
 
           {/* Controls */}
           <div className="lg:col-span-5">
-            <div role="tablist" aria-label="Roof material" aria-orientation="vertical" className="flex flex-col border-t border-line">
+            <div role="tablist" aria-label="Roof material" aria-orientation="vertical" className="ph-mat-tabs flex flex-col border-t border-line">
               {materials.map((m, i) => {
                 const on = m.id === active;
                 return (
@@ -164,7 +164,7 @@ export function MaterialExplorer() {
                 {mat.blurb}
               </p>
 
-              <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-[2px] bg-line">
+              <dl className="ph-mat-specs mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-[2px] bg-line">
                 <div className="bg-ink p-4">
                   <dt className="t-eyebrow text-faint">Lifespan</dt>
                   <dd className="mt-2 font-display text-3xl font-extrabold tracking-[-0.03em]">

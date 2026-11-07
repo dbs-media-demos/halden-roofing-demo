@@ -3,6 +3,7 @@
 import Image, { type StaticImageData } from "next/image";
 import { useEffect, useRef } from "react";
 import clsx from "clsx";
+import { isPhone } from "@/lib/gsap";
 
 /** Muted loop that only loads when near the viewport; never plays for reduced motion or save-data. */
 export function VideoLoop({ src, poster, alt, className, sizes = "100vw" }: { src: string; poster: StaticImageData; alt: string; className?: string; sizes?: string }) {
@@ -12,7 +13,7 @@ export function VideoLoop({ src, poster, alt, className, sizes = "100vw" }: { sr
     const v = ref.current;
     if (!v) return;
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || conn?.saveData) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || conn?.saveData || isPhone()) return;
     const io = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) {

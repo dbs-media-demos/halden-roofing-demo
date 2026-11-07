@@ -20,7 +20,7 @@ export function Drone() {
   useRun(root);
 
   return (
-    <div ref={root} aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden motion-reduce:hidden">
+    <div ref={root} aria-hidden className="fx-desk pointer-events-none absolute inset-0 overflow-hidden motion-reduce:hidden">
       <div className="drone fx-loop">
         <span className="drone-scan fx-loop absolute left-0 top-[46px] h-24 w-24 rounded-[3px] border-2 border-dashed border-copper bg-copper/10 md:h-32 md:w-32" />
         {/* shadow on the ground, offset like late-afternoon sun */}

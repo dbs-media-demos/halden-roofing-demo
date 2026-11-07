@@ -23,7 +23,7 @@ export function OpenBadge({ className }: { className?: string }) {
   if (!biz.hours) return null;
 
   return (
-    <span className={clsx("t-eyebrow inline-flex items-center gap-2", className)} aria-live="polite">
+    <span className={clsx("open-badge t-eyebrow inline-flex items-center gap-2", className)} aria-live="polite">
       <span
         aria-hidden
         className={clsx(

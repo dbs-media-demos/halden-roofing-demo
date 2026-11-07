@@ -989,3 +989,941 @@ input.range::-moz-range-thumb {
   stroke-dasharray: 1;
   animation: draw 1.2s var(--ease-in-out-quart) 0.1s both;
 }
+
+/* ─────────────────────── desktop-only font ─────────────────────── */
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url(/fonts/ibm-plex-mono-500-latin.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+:root {
+  --font-plex-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* ─────────────────────────── phone pass ───────────────────────────
+   Below 768 px or on a touch screen (lib/gsap PHONE_QUERY). Simple, fast, still expensive-looking:
+   the desktop's pinned and scrubbed scenes become plain stacked sections with the same words.
+   Plain CSS on purpose: it sits outside Tailwind's layers, so it wins over the desktop utilities
+   without touching a single desktop style. */
+
+@media (min-width: 768px) and (pointer: fine), (min-width: 768px) and (pointer: none) {
+  .ph-only {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  :root {
+    /* Two font files on phones: Archivo (inlined) + Manrope. Labels use Manrope; Plex is never fetched. */
+    --font-plex-mono: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+    --header-h: 4rem;
+    --banner-h: 2.5rem;
+  }
+
+  .ph-hide,
+  .fx-desk {
+    display: none !important;
+  }
+
+  /* No first-paint fades: what's on the first screen is simply there */
+  .anim-heading,
+  .anim-fade,
+  .mark-draw .mark-roof,
+  .mark-draw .mark-h {
+    animation: none;
+    stroke-dasharray: none;
+  }
+
+  a,
+  button,
+  summary,
+  label {
+    -webkit-tap-highlight-color: transparent;
+  }
+  a.rounded-full:active,
+  button:active,
+  summary:active {
+    transform: scale(0.97);
+    transition: transform 0.12s ease-out;
+  }
+
+  /* Type */
+  .t-eyebrow {
+    font-size: 0.69rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+  .t-spec {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  [data-home] .t-h1 {
+    font-size: 1.55rem;
+    line-height: 0.98;
+  }
+  [data-home] .t-h2 {
+    font-size: 1.42rem;
+    line-height: 1.02;
+  }
+  [data-home] .t-h3 {
+    font-size: 1.1rem;
+  }
+  [data-home] .t-lead {
+    font-size: 0.9rem;
+    line-height: 1.38;
+  }
+
+  /* Rhythm: section gaps, not content, were most of the 29 screens */
+  [data-home] {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.92rem;
+    line-height: 1.42;
+  }
+  [data-home] > *,
+  [data-home] .grid > * {
+    min-width: 0;
+  }
+  [data-home] .wrap.grid:not(.ph-intro-story):not(.ph-foot) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  [data-home] > section:not(.hero-root) {
+    padding-top: 1.4rem;
+    padding-bottom: 1.4rem;
+  }
+  [data-home] :is(.mt-3, .mt-4) {
+    margin-top: 0.5rem;
+  }
+  [data-home] :is(.mt-5, .mt-6) {
+    margin-top: 0.6rem;
+  }
+  [data-home] :is(.mt-8, .mt-10, .mt-12, .mt-14, .mt-16, .mt-20, .mt-24) {
+    margin-top: 0.875rem;
+  }
+  [data-home] :is(.gap-6, .gap-8, .gap-10, .gap-12, .gap-14) {
+    gap: 0.75rem;
+  }
+  [data-home] [data-hero-cta].mt-4 {
+    margin-top: 0.85rem;
+  }
+
+  /* Section order, half-emergency trade: proof, project photos, reviews, how the estimate works, form, FAQ */
+  [data-home] > [aria-labelledby="hero-title"] { order: 0; }
+  [data-home] > [aria-labelledby="intro-title"] { order: 1; }
+  [data-home] > [aria-labelledby="projects-title"] { order: 2; }
+  [data-home] > [aria-labelledby="reviews-title"] { order: 3; }
+  [data-home] > [aria-labelledby="storm-title"] { order: 4; background-color: var(--slate); --surface: var(--slate-2); }
+  [data-home] > [aria-labelledby="estimate-title"] { order: 5; }
+  [data-home] > [aria-labelledby="faq-title"] { order: 6; }
+  [data-home] > [aria-labelledby="services-title"] { order: 7; }
+  [data-home] > [data-marquee] { order: 8; }
+  [data-home] > [aria-labelledby="chaser-title"] { order: 9; }
+  [data-home] > [aria-labelledby="materials-title"] { order: 10; }
+  [data-home] > [aria-labelledby="warranty-title"] { order: 11; }
+  [data-home] > [aria-labelledby="map-title"] { order: 12; }
+  [data-home] > [aria-labelledby="cta-title"] { order: 13; }
+
+  /* One small once-only fade-and-rise per section (set by PhoneRise) */
+  section[data-rise="0"] > * {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  section[data-rise="1"] > * {
+    transition: opacity 0.6s ease-out, transform 0.7s var(--ease-out-expo);
+  }
+
+  /* Swipeable rails: the next card half showing, a vertical swipe still scrolls the page */
+  .ph-rail {
+    display: flex !important;
+    gap: 0.625rem;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .ph-rail::-webkit-scrollbar,
+  .ph-strip::-webkit-scrollbar {
+    display: none;
+  }
+  .ph-rail > * {
+    flex: 0 0 min(78vw, 21rem);
+    scroll-snap-align: start;
+  }
+
+  /* Header: opaque once scrolled (all widths); the hail banner leaves with a transform, so nothing reflows */
+  .site-banner[data-banner="on"] {
+    grid-template-rows: 1fr !important;
+  }
+  .site-banner[data-banner="on"] > div > div {
+    height: var(--banner-h);
+    min-height: 0;
+  }
+  .site-header[data-lift="1"] {
+    translate: 0 calc(var(--banner-h) * -1);
+  }
+
+  /* ── Hero: a still under the gable, everything that matters on the first screen ── */
+  .hero-root {
+    height: auto !important;
+  }
+  .hero-stage {
+    position: relative;
+    height: auto;
+    overflow: hidden;
+  }
+  .hero-window {
+    --top: calc(var(--header-h) + var(--banner-h));
+    background: var(--ink);
+    animation: none;
+    clip-path: polygon(0 100%, 0 calc(var(--top) + 25vw), 50% var(--top), 100% calc(var(--top) + 25vw), 100% 100%);
+  }
+  .hero-window img {
+    height: 66% !important;
+    bottom: auto !important;
+  }
+  .hero-window [data-hero-dim] {
+    background: rgb(14 22 32 / 0.12);
+  }
+  .hero-shade {
+    height: 70%;
+    background: linear-gradient(to top, var(--ink) 56%, rgb(14 22 32 / 0.72) 72%, transparent);
+  }
+  .hero-copy {
+    height: auto;
+    /* Short enough that the next section's roofline peeks in; the copy sits clear of its peak */
+    min-height: 80svh;
+    padding-top: calc(var(--header-h) + var(--banner-h) + 25vw);
+    padding-bottom: calc(clamp(28px, 5vw, 84px) + 0.75rem);
+  }
+  /* Short screens: less photo and no intro line, so the buttons stay up and the next section still peeks */
+  @media (max-height: 620px) {
+    .hero-copy {
+      padding-top: calc(var(--header-h) + var(--banner-h) + 1rem);
+    }
+    .hero-lead {
+      display: none;
+    }
+  }
+  .hero-title {
+    margin-top: 0.6rem;
+    font-size: 2.45rem;
+    line-height: 0.96;
+    overflow-wrap: anywhere;
+  }
+  .hero-ph-long {
+    font-size: 1.95rem;
+  }
+  .hero-ph-sub {
+    margin-top: 0.45rem;
+    font-size: 1.02rem;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+  .hero-ph-btn {
+    flex-basis: 8rem;
+    min-height: 3.25rem;
+    padding-inline: 1.1rem;
+    font-size: 0.98rem;
+  }
+  .hero-lead {
+    margin-top: 0.85rem;
+  }
+  .hero-lead .t-lead {
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
+
+  /* ── Proof ── */
+  .ph-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-top: 0;
+  }
+  [data-home] > section[aria-labelledby="intro-title"] {
+    padding-top: calc(var(--rise) + 0.5rem);
+    padding-bottom: 1.25rem;
+  }
+  .ph-stats {
+    order: -1;
+    border-top: 1px solid var(--line);
+  }
+  .ph-stats > div {
+    padding: 0.55rem 0.75rem 0.55rem 0;
+  }
+  .ph-stats > div:nth-child(even) {
+    padding-left: 0.75rem;
+  }
+  .ph-stats p:first-child {
+    font-size: 1.75rem;
+  }
+  .ph-stats p + p {
+    margin-top: 0.25rem;
+  }
+  .ph-intro-story {
+    grid-template-columns: minmax(0, 1fr) 36%;
+    gap: 0.75rem 0.875rem;
+  }
+  .ph-intro-left,
+  .ph-intro-right {
+    display: contents;
+  }
+  .ph-intro-left > h2,
+  .ph-intro-text,
+  .ph-intro-cap {
+    grid-column: 1 / -1;
+  }
+  .ph-intro-text {
+    margin-top: 0;
+    font-size: 1.05rem;
+    line-height: 1.16;
+  }
+  .ph-intro-para {
+    grid-column: 1;
+    margin-top: 0;
+    font-size: 0.9rem;
+    line-height: 1.42;
+  }
+  .ph-intro-para svg {
+    display: none;
+  }
+  .ph-intro-photo {
+    grid-column: 2;
+    aspect-ratio: auto;
+    align-self: stretch;
+    min-height: 100%;
+  }
+  .ph-intro-cap {
+    margin-top: 0;
+  }
+  .ph-strip {
+    flex-wrap: nowrap;
+    gap: 1.25rem;
+    margin-inline: calc(var(--gutter) * -1);
+    margin-top: 0;
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .ph-strip > li {
+    flex: none;
+    gap: 0.5rem;
+  }
+  .ph-strip svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  .ph-strip li span span:first-child {
+    font-size: 0.86rem;
+    white-space: nowrap;
+  }
+  .ph-strip li span span:last-child {
+    white-space: nowrap;
+  }
+
+  /* ── Project photos ── */
+  [data-home] > section[aria-labelledby="projects-title"] {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+  .ph-projects-head {
+    padding: 0 var(--gutter) 1.25rem;
+  }
+  .ph-ba {
+    aspect-ratio: 16 / 9;
+  }
+  [data-cursor="drag"] span {
+    backdrop-filter: none;
+  }
+  .ph-ba-meta dl {
+    gap: 0.5rem;
+    padding-top: 0.6rem;
+  }
+  .ph-ba-meta dd {
+    font-size: 0.9rem;
+  }
+  .ph-pin {
+    display: block;
+    height: auto;
+    padding-bottom: 0;
+    overflow: visible;
+  }
+  .ph-track {
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    overscroll-behavior-x: contain;
+    transform: none !important;
+  }
+  .ph-track > [data-rail-card] {
+    flex: 0 0 62vw;
+    max-width: 20rem;
+  }
+  .ph-track > [data-rail-card] > p {
+    margin-top: 0.4rem;
+  }
+  .ph-card {
+    aspect-ratio: 1 / 0.92;
+  }
+  .ph-track [data-rail-card] p.font-display {
+    font-size: 1rem;
+  }
+  .ph-track [data-rail-card] .absolute.inset-x-0.bottom-0 {
+    padding: 0.8rem;
+  }
+  .ph-meter {
+    position: static;
+    margin-top: 0.75rem;
+    justify-content: flex-start;
+  }
+
+  /* ── Reviews ── */
+  .ph-rating {
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .ph-rating > p {
+    font-size: 2.75rem;
+    line-height: 1;
+  }
+  .ph-rating .mt-2 {
+    margin-top: 0.15rem;
+    font-size: 0.86rem;
+    line-height: 1.3;
+  }
+  [aria-labelledby="reviews-title"] figure {
+    padding: 0.75rem 0.875rem;
+  }
+  [aria-labelledby="reviews-title"] figure > div:first-child > span:first-child {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.95rem;
+  }
+  [aria-labelledby="reviews-title"] figure > div + div {
+    margin-top: 0.4rem;
+  }
+  [aria-labelledby="reviews-title"] blockquote {
+    margin-top: 0.3rem;
+    font-size: 0.9rem;
+    line-height: 1.42;
+  }
+  [aria-labelledby="reviews-title"] figure > p {
+    margin-top: 0.4rem;
+  }
+  /* "Read all reviews" shares the eyebrow's row */
+  [aria-labelledby="reviews-title"] > .wrap.relative {
+    position: absolute;
+    top: 0.75rem;
+    right: 0;
+    width: auto;
+    margin: 0;
+  }
+  [aria-labelledby="reviews-title"] > .wrap.relative a {
+    min-height: 2.25rem;
+    padding-inline: 0.875rem;
+    font-size: 0.82rem;
+  }
+  [aria-labelledby="reviews-title"] .ph-rail > * {
+    flex-basis: min(84vw, 22rem);
+  }
+
+  /* ── How the estimate works: the sticky stage becomes one picture, the steps a plain list ── */
+  [data-ph-stage] {
+    position: static;
+    height: 10.5rem;
+  }
+  [data-ph-stage] :not(.roof-course) {
+    animation: none !important;
+  }
+  [data-ph-stage] p {
+    backdrop-filter: none;
+  }
+  /* The whole house and its warranty seal fit in the shorter picture */
+  .ph-stage-house {
+    width: 94%;
+  }
+  .ph-step {
+    --step-h: 1rem;
+    display: block;
+    min-height: 0;
+    padding: 0.4rem 0 0.4rem 0.875rem;
+    border-color: var(--line) !important;
+  }
+  .ph-step h3 {
+    margin-top: 0.2rem;
+    font-size: 1.02rem !important;
+    line-height: 1.1;
+    color: var(--stone) !important;
+  }
+  .ph-step .t-lead {
+    margin-top: 0.2rem;
+    max-width: none;
+    font-size: 0.88rem;
+    line-height: 1.38;
+  }
+  .ph-storm-cta {
+    margin-top: 0.5rem;
+    padding-top: 0.875rem;
+    gap: 0.5rem;
+  }
+  .ph-storm-cta a {
+    width: 100%;
+    min-height: 3rem;
+  }
+  .ph-storm-cta a + a {
+    min-height: 2.5rem;
+    border: 0;
+    font-size: 0.9rem;
+  }
+
+  /* ── Form ── */
+  [aria-labelledby="estimate-title"] form {
+    padding: 0.875rem;
+  }
+  [aria-labelledby="estimate-title"] form > .mt-8 {
+    margin-top: 0.75rem;
+    gap: 0.75rem;
+  }
+  [aria-labelledby="estimate-title"] .ph-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.375rem;
+  }
+  [aria-labelledby="estimate-title"] .ph-choices:has(> :nth-child(6)) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  [aria-labelledby="estimate-title"] .ph-choices label {
+    min-height: 2.5rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.84rem;
+    line-height: 1.15;
+    white-space: normal;
+  }
+  [aria-labelledby="estimate-title"] .ph-choices label svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  [aria-labelledby="estimate-title"] .ph-choices label .text-sm,
+  [aria-labelledby="estimate-title"] .ph-choices label span span + span {
+    display: none;
+  }
+  [aria-labelledby="estimate-title"] form > .mt-10 {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    gap: 0.5rem;
+  }
+  [aria-labelledby="estimate-title"] button[type="submit"] {
+    min-height: 3.25rem;
+  }
+
+  /* ── FAQ ── */
+  .ph-faq {
+    gap: 0.5rem;
+  }
+  .ph-faq > div:first-child {
+    position: relative;
+  }
+  .ph-faq > div:first-child > div:last-child {
+    position: absolute;
+    top: -0.875rem;
+    right: 0;
+    margin: 0;
+  }
+  .ph-faq > div:first-child a {
+    min-height: 2.25rem;
+    padding-inline: 0.875rem;
+    font-size: 0.82rem;
+  }
+  [data-home] > section[aria-labelledby="faq-title"] {
+    padding-top: 0.5rem;
+  }
+  .faq summary {
+    min-height: 3rem;
+    padding-block: 0.4rem;
+    gap: 0.75rem;
+  }
+  .faq summary > span:first-child {
+    font-size: 0.96rem;
+    line-height: 1.25;
+  }
+  .faq-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+  .faq p {
+    padding: 0 0 0.875rem;
+  }
+
+  /* ── Services ── */
+  .ph-svc {
+    border: 0;
+  }
+  .ph-svc > li {
+    flex-basis: 11rem;
+    border: 0;
+  }
+  .ph-svc a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0;
+  }
+  .ph-svc a > span:nth-child(4) {
+    display: block;
+    order: -1;
+    width: 100%;
+    height: 6rem;
+  }
+  .ph-svc a > span:nth-child(2) {
+    font-size: 0.92rem;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+  .ph-svc a > span:nth-child(1),
+  .ph-svc a > span:nth-child(3),
+  .ph-svc a > span:nth-child(5),
+  .scan-glow {
+    display: none;
+  }
+
+  /* ── Neighbourhood strip: still, and a swipe away ── */
+  [data-marquee] {
+    padding-block: 0.625rem;
+  }
+  [data-marquee] .marquee-wrap {
+    font-size: 0.86rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  [data-marquee] .marquee-wrap::-webkit-scrollbar {
+    display: none;
+  }
+  [data-marquee] .marquee {
+    animation: none;
+  }
+  [data-marquee] ul[aria-hidden="true"] {
+    display: none;
+  }
+  [data-marquee] li > span:first-child {
+    padding-inline: 0.75rem;
+  }
+
+  /* ── Storm chaser ── */
+  .ph-wide {
+    aspect-ratio: 5 / 2;
+  }
+  .ph-cards > li {
+    display: block;
+    padding: 0.875rem;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: var(--surface);
+  }
+  .ph-cards > li > p + p {
+    margin-top: 0.5rem;
+    padding-left: 0;
+  }
+  .ph-cards > li > p:first-child > span:last-child {
+    font-size: 0.96rem;
+    line-height: 1.25;
+  }
+  .ph-law {
+    gap: 0.75rem;
+    padding: 0.875rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  .ph-law > span {
+    font-size: 2rem;
+  }
+
+  /* ── Materials: the tool the visitor drives ── */
+  .ph-mat-stage > [aria-hidden] {
+    animation: none;
+  }
+  .ph-mat-stage > .relative.flex-1 {
+    justify-content: center;
+    padding: 0.25rem 0 0;
+  }
+  .ph-mat-stage svg {
+    width: 84%;
+  }
+  .ph-mat-label {
+    padding: 0.4rem 0.875rem;
+    background: var(--stone);
+    backdrop-filter: none;
+  }
+  .ph-mat-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.25rem;
+    border: 0;
+  }
+  .ph-mat-tabs > button {
+    justify-content: center;
+    min-height: 2.75rem;
+    padding-inline: 0.125rem;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .ph-mat-tabs > button[aria-selected="true"] {
+    border-color: var(--copper);
+    background: var(--surface);
+  }
+  .ph-mat-tabs > button > span:first-child > span:first-child,
+  .ph-mat-tabs .chev {
+    display: none;
+  }
+  .ph-mat-tabs > button > span:first-child > span:last-child {
+    font-size: 0.74rem;
+    letter-spacing: -0.02em;
+  }
+  #mat-panel {
+    padding-top: 0.75rem;
+  }
+  .ph-mat-specs > div {
+    padding: 0.4rem 0.625rem;
+  }
+  .ph-mat-specs dd {
+    margin-top: 0.1rem;
+    font-size: 1.05rem;
+    line-height: 1.15;
+  }
+  .ph-mat-specs dd span.text-base {
+    font-size: 0.8rem;
+  }
+  #mat-panel fieldset .mt-4 {
+    margin-top: 0.4rem;
+    gap: 0.25rem;
+  }
+  #mat-panel fieldset + div a {
+    width: 100%;
+    min-height: 3rem;
+  }
+
+  /* ── Warranty + financing ── */
+  .ph-tiers > * {
+    flex-basis: min(84vw, 22rem);
+    margin: 0;
+    padding: 0.875rem;
+  }
+  .ph-tiers h3 {
+    margin-top: 0.3rem;
+    font-size: 1.15rem;
+  }
+  .ph-tiers article > p.flex {
+    margin-top: 0.3rem;
+  }
+  .ph-tiers article > p.flex > span:first-child {
+    font-size: 2.2rem;
+  }
+  .ph-tiers ul {
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    gap: 0.35rem;
+  }
+  .ph-tiers li {
+    gap: 0.5rem;
+    font-size: 0.86rem;
+    line-height: 1.32;
+  }
+  .ph-fin {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    gap: 0.5rem 0.875rem;
+    padding-top: 0.875rem;
+  }
+  .ph-fin > div:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .ph-fin > div:last-child {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: end;
+  }
+  .ph-fin > div:last-child a {
+    min-height: 2.75rem;
+    padding-inline: 0.875rem;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+  .ph-fin > p > span:nth-child(2) {
+    font-size: 3rem;
+  }
+  .ph-fin > p > span:last-child {
+    font-size: 1.1rem;
+  }
+
+  /* ── Service area ── */
+  .ph-cities {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
+  }
+  .ph-cities a {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    padding-block: 0.4rem;
+  }
+  .ph-cities a > span:first-child {
+    font-size: 0.92rem;
+  }
+  .ph-cities a > span:last-child {
+    font-size: 0.64rem;
+  }
+  .ph-map svg {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: 9.5rem;
+    margin-inline: auto;
+  }
+  .map-hail,
+  .map-ping {
+    animation: none;
+  }
+  .ph-gmap {
+    aspect-ratio: 2;
+  }
+  .ph-gmap iframe {
+    /* A swipe over the map scrolls the page; "Get directions" opens the real one */
+    pointer-events: none;
+  }
+
+  /* ── Closing call-to-action ── */
+  [data-home] > section[aria-labelledby="cta-title"] {
+    padding-top: var(--rise);
+    padding-bottom: 0;
+  }
+  .ph-cta {
+    padding-block: 1.5rem;
+  }
+  .ph-cta a {
+    flex-grow: 1;
+    min-height: 3rem;
+  }
+  /* The live status replaces the summary line in place: same height, one line, no jump */
+  .open-badge {
+    min-height: 1.2em;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+  .open-badge > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Footer + concept badge. The badge sits in the page's flow, so at any scroll position it covers nothing. ── */
+  footer {
+    padding-top: 1.5rem;
+    padding-bottom: 0.75rem;
+    font-size: 0.88rem;
+  }
+  .ph-foot {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .ph-wordmark {
+    font-size: calc(100vw / var(--n) * 0.98);
+  }
+  .ph-foot-brand,
+  .ph-foot-company {
+    grid-column: 1 / -1;
+  }
+  .ph-foot-brand {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.6rem 0.75rem;
+  }
+  .ph-foot-brand > * {
+    margin: 0;
+  }
+  .ph-foot-brand > div {
+    grid-column: 1 / -1;
+    gap: 0.1rem;
+  }
+  .ph-foot-brand > .t-h3 {
+    font-size: 0.92rem;
+    line-height: 1.15;
+  }
+  .ph-foot-brand svg {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  footer nav .mt-5 {
+    margin-top: 0.4rem;
+    gap: 0.2rem;
+  }
+  footer nav a {
+    font-size: 0.86rem;
+  }
+  .ph-foot-company {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto 1fr;
+    column-gap: 1rem;
+  }
+  .ph-foot-company > p,
+  .ph-foot-company > ul {
+    grid-column: 1;
+  }
+  .ph-foot-hours {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin-top: 0;
+    padding-top: 0;
+    border: 0;
+  }
+  .ph-foot-hours dl {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 0.5rem;
+    row-gap: 0.15rem;
+    margin-top: 0.5rem;
+    font-size: 0.74rem;
+    line-height: 1.3;
+  }
+  footer > .wrap.mt-16 {
+    margin-top: 1rem;
+  }
+  footer > .wrap.mt-6 {
+    margin-top: 0.625rem;
+    padding-top: 0.625rem;
+    gap: 0.125rem;
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+  body {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 4.75rem);
+  }
+  [data-demo-pill] {
+    position: static;
+    width: max-content;
+    max-width: calc(100% - 1.5rem);
+    margin: 0 0.75rem 0.5rem;
+    background: var(--slate);
+    box-shadow: none;
+    backdrop-filter: none;
+    opacity: 1;
+    translate: none;
+    pointer-events: auto;
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (max-width: 767px) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

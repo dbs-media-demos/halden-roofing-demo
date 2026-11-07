@@ -24,6 +24,8 @@
   - Mobile inner pages: P 90–93 / 100 / 100. Desktop: P 98–100 / 100 / 100. CLS 0.
   - Local production build, measured 2026-09-28. Observed LCP ≈ 0.3–0.5 s.
 
+- Phone pass (2026-11-07): see README "Phones". Section order on phones: hero, proof, project photos, reviews, how the estimate works, form, FAQ, then services, storm chaser, materials, warranty, map, CTA.
+
 ## Portfolio copy
 EN title: Halden Roofing Co. — roofing contractor, Fort Worth
 EN one-liner (≤ 120 chars): A storm-proof roofing site: a drone film through a roof-shaped window, a scroll-told hail story and live re-roofing.

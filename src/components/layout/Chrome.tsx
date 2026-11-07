@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { PhoneIcon } from "@/components/ui/Button";
@@ -8,37 +9,54 @@ import { agencyName, agencyUrl } from "@/lib/site";
 import { useBiz } from "@/components/preview/BizContext";
 import { telOf } from "@/lib/biz-core";
 import { useDismissed } from "@/lib/session-flag";
+import { belowFold, isPhone, prefersReducedMotion } from "@/lib/gsap";
 
-/** Sticky Call + Free inspection bar on phones. */
+/** Sticky Call + Free estimate bar on phones. Slides in once the hero's own buttons have scrolled away. */
 export function MobileBar() {
   const biz = useBiz();
+  const pathname = usePathname();
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > 280);
+    const onScroll = () => {
+      const cta = document.querySelector("[data-hero-cta]");
+      setShow(window.scrollY > (cta ? cta.getBoundingClientRect().bottom + window.scrollY - 64 : 280));
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // The homepage (and a preview of it) has the form on the page; other pages have their own
+  const onHome = pathname === "/" || pathname.startsWith("/for/");
+  const estimateCls = "flex min-h-12 items-center justify-center whitespace-nowrap rounded-full bg-copper px-4 text-[0.95rem] font-semibold text-ink";
   return (
     <div
+      data-mobile-bar
       className={clsx(
-        "fixed inset-x-0 bottom-0 z-[70] border-t border-stone/10 bg-ink/90 px-3 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] pt-2.5 backdrop-blur-xl transition-transform duration-500 ease-[var(--ease-out-expo)] md:hidden",
+        "ph-only fixed inset-x-0 bottom-0 z-[70] border-t border-stone/10 bg-ink px-3 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] pt-2.5 transition-transform duration-500 ease-[var(--ease-out-expo)]",
         show ? "translate-y-0" : "translate-y-full",
       )}
     >
-      <div className="grid grid-cols-[auto_1fr] gap-2">
-        <a
-          href={telOf(biz)}
-          className="flex min-h-12 items-center justify-center gap-2 rounded-full border border-stone/20 px-5 font-semibold text-stone"
-          aria-label={`Call ${biz.phoneDisplay}`}
-        >
-          <PhoneIcon className="text-copper" />
-          Call
-        </a>
-        <Link href="/free-inspection" className="flex min-h-12 items-center justify-center rounded-full bg-copper px-5 font-semibold text-ink">
-          Book a free inspection
-        </Link>
+      <div className={clsx("grid gap-2", biz.phone && "grid-cols-[auto_1fr]")}>
+        {biz.phone && (
+          <a
+            href={telOf(biz)}
+            className="flex min-h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-stone/20 px-4 text-[0.95rem] font-semibold text-stone"
+            aria-label={`Call ${biz.phoneDisplay}`}
+          >
+            <PhoneIcon className="text-copper" />
+            {biz.phoneDisplay}
+          </a>
+        )}
+        {onHome ? (
+          <a href="#estimate" className={estimateCls}>
+            Free estimate
+          </a>
+        ) : (
+          <Link href="/free-inspection" className={estimateCls}>
+            Free estimate
+          </Link>
+        )}
       </div>
     </div>
   );
@@ -62,6 +80,7 @@ export function DemoPill() {
   if (dismissed) return null;
   return (
     <div
+      data-demo-pill
       className={clsx(
         "fixed bottom-[5.6rem] left-3 z-[75] flex items-center rounded-full border border-stone/15 bg-ink/85 text-stone shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-md transition-[opacity,translate] duration-700 ease-[var(--ease-out-expo)] md:bottom-4 md:left-4",
         shown ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0 focus-within:pointer-events-auto focus-within:translate-y-0 focus-within:opacity-100",
@@ -89,6 +108,34 @@ export function DemoPill() {
       </button>
     </div>
   );
+}
+
+/**
+ * Phones: one small once-only fade-and-rise per section (transform + opacity, see globals.css).
+ * Sections are only hidden from here, so without JS or with reduced motion everything just shows.
+ */
+export function PhoneRise() {
+  const pathname = usePathname();
+  useEffect(() => {
+    if (!isPhone() || prefersReducedMotion()) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          io.unobserve(e.target);
+          e.target.setAttribute("data-rise", "1");
+        }
+      },
+      { rootMargin: "0px 0px -6% 0px" },
+    );
+    document.querySelectorAll("main section").forEach((s) => {
+      if (!belowFold(s)) return;
+      s.setAttribute("data-rise", "0");
+      io.observe(s);
+    });
+    return () => io.disconnect();
+  }, [pathname]);
+  return null;
 }
 
 /** Desktop cursor: a small copper roof chevron that lifts over links. */

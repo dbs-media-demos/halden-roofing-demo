@@ -54,6 +54,7 @@ Optimized copies live in `src/assets/photos/` (served through next/image) and `p
 | house-metal-white.jpg | https://unsplash.com/photos/DknO0c-iouQ | Roger Starnes Sr (@rstar50) |
 | house-modern-farmhouse.jpg | https://unsplash.com/photos/kEjrQ8h9Bgc | Tyrone Sanders (@tyronesand) |
 | house-pink-sky.jpg | https://unsplash.com/photos/vN01MT3NsDQ | Vidar Nordli-Mathisen (@vidarnm) |
+| hero-phone.jpg (crop of house-ranch-dusk) | https://unsplash.com/photos/ZdJ6eIKN3G0 | Cole Ankney (@rcankney) |
 | house-ranch-dusk.jpg | https://unsplash.com/photos/ZdJ6eIKN3G0 | Cole Ankney (@rcankney) |
 | house-stone-gable.jpg | https://unsplash.com/photos/LN2rq7GkHcQ | fruitfullmedia (@fruitfullmedia) |
 | house-stone-ranch.jpg | https://unsplash.com/photos/WR9UUHT3ns8 | Roger Starnes Sr (@rstar50) |
