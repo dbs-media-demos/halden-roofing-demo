@@ -3,7 +3,8 @@ import { rng } from "./geometry";
 
 /*
  * Every texture is painted on a canvas at start-up: no image requests, a few milliseconds of work,
- * and the colours stay in this file's palette.
+ * and the colours stay in this file's palette. Each is painted once per visit: every scene gets its
+ * own texture objects on the same canvas, so the second and third scenes don't paint at all.
  */
 
 function canvas(w: number, h = w) {
@@ -23,7 +24,7 @@ function tex(c: HTMLCanvasElement, repeat: [number, number] = [1, 1], color = tr
 }
 
 /** Speckle used as the granule surface of shingles, slate and clay (white-ish, tinted per instance). */
-export function grainTexture() {
+function paintGrain() {
   const [c, g] = canvas(256);
   const r = rng(7);
   g.fillStyle = "#d8d8d8";
@@ -41,7 +42,7 @@ export function grainTexture() {
  * Cream Texas limestone ("Austin stone") laid in irregular courses: mixed heights, long and short
  * stones, a few tan and rust ones, thin mortar. Comes with a bump map. One tile covers 2.4 m.
  */
-export function stoneTexture() {
+function paintStone() {
   const W = 1024;
   const px = W / 2.4; // pixels per metre
   const [c, g] = canvas(W);
@@ -93,7 +94,7 @@ export function stoneTexture() {
 }
 
 /** Warm radial glow for the fake bloom around lit windows (additive sprite). */
-export function glowTexture() {
+function paintGlow() {
   const [c, g] = canvas(128);
   const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
   grad.addColorStop(0, "rgba(255,190,120,0.55)");
@@ -104,7 +105,7 @@ export function glowTexture() {
   return tex(c);
 }
 
-export function grassTexture() {
+function paintGrass() {
   const [c, g] = canvas(512);
   const r = rng(3);
   g.fillStyle = "#4a5a2f";
@@ -123,7 +124,7 @@ export function grassTexture() {
   return tex(c, [40, 40]);
 }
 
-export function concreteTexture() {
+function paintConcrete() {
   const [c, g] = canvas(256);
   const r = rng(5);
   g.fillStyle = "#b6b2aa";
@@ -139,7 +140,7 @@ export function concreteTexture() {
 }
 
 /** Sectional garage door: four rows of raised panels. */
-export function garageTexture() {
+function paintGarage() {
   const [c, g] = canvas(512, 256);
   g.fillStyle = "#e9e5dc";
   g.fillRect(0, 0, 512, 256);
@@ -161,7 +162,7 @@ export function garageTexture() {
 }
 
 /** A lit room seen through glass: warm, brighter low, curtain folds at the sides. */
-export function windowTexture() {
+function paintWindow() {
   const [c, g] = canvas(128);
   const grad = g.createLinearGradient(0, 0, 0, 128);
   grad.addColorStop(0, "#5a3a20");
@@ -178,7 +179,7 @@ export function windowTexture() {
 }
 
 /** Soft disc for contact shadows (an alpha map: white = dark shadow). */
-export function blobTexture() {
+function paintBlob() {
   const [c, g] = canvas(256);
   g.fillStyle = "#000";
   g.fillRect(0, 0, 256, 256);
@@ -189,4 +190,36 @@ export function blobTexture() {
   g.fillStyle = grad;
   g.fillRect(0, 0, 256, 256);
   return tex(c, [1, 1], false);
+}
+
+type Painted = THREE.Texture | Record<string, THREE.Texture>;
+const painters: (() => void)[] = [];
+
+/** Paint once, hand out copies (a copy shares the canvas; each renderer uploads its own). */
+function once<T extends Painted>(paint: () => T): () => T {
+  let master: T | null = null;
+  const ensure = () => (master ??= paint());
+  painters.push(ensure);
+  return () => {
+    const m = ensure();
+    if (m instanceof THREE.Texture) return m.clone() as T;
+    return Object.fromEntries(Object.entries(m).map(([k, t]) => [k, t.clone()])) as T;
+  };
+}
+
+export const grainTexture = once(paintGrain);
+export const stoneTexture = once(paintStone);
+export const glowTexture = once(paintGlow);
+export const grassTexture = once(paintGrass);
+export const concreteTexture = once(paintConcrete);
+export const garageTexture = once(paintGarage);
+export const windowTexture = once(paintWindow);
+export const blobTexture = once(paintBlob);
+
+/** Paint every texture ahead of the build, one per idle slot. */
+export async function paintTextures(pause: () => Promise<void>) {
+  for (const p of painters) {
+    p();
+    await pause();
+  }
 }

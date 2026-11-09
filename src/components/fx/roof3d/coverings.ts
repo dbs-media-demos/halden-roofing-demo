@@ -309,16 +309,8 @@ const LOOK: Record<MaterialId, { roughness: number; metalness: number; grain: bo
   metal: { roughness: 0.34, metalness: 0.88, grain: false },
 };
 
-export function buildCovering(kind: MaterialId, hex: string, grain: THREE.Texture, seed = 1): Covering {
-  const r = rng(seed);
-  let spec: Spec;
-  if (kind === "shingle") spec = [...shingles(hex, r), { geo: new THREE.BoxGeometry(1, 1, 1), items: slabCaps(hex, r, 0.2, 0.17, 0.05, 0.014, 0.82) }];
-  else if (kind === "slate") spec = [...slates(hex, r), { geo: new THREE.BoxGeometry(1, 1, 1), items: slabCaps(hex, r, 0.26, 0.16, 0.04, 0.012, 0.85) }];
-  else if (kind === "tile") spec = [...tiles(hex, r), ...tileCaps(hex, r)];
-  else spec = [...metal(hex, r), { geo: new THREE.BoxGeometry(1, 1, 1), items: slabCaps(hex, r, 1.2, 0.2, 0.05, 0.01, 0.95) }];
-
+function coveringMaterials(kind: MaterialId, grain: THREE.Texture, uniforms: InstallUniforms) {
   const look = LOOK[kind];
-  const uniforms: InstallUniforms = { uFront: { value: 2 }, uCut: { value: -1 } };
   const material = withInstall(
     new THREE.MeshStandardMaterial({
       color: 0xffffff,
@@ -331,6 +323,52 @@ export function buildCovering(kind: MaterialId, hex: string, grain: THREE.Textur
     "roof-install",
   );
   const depth = withInstall(new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking }), uniforms, "roof-install-depth");
+  return { material, depth };
+}
+
+/**
+ * One invisible piece of every roof kind, set up exactly like the real ones (instanced, tinted,
+ * shadowed, install shader). Added to the scene for the start-up compile, so swapping roofs later
+ * never compiles a shader mid-click. Keep it until the scene goes: disposing it frees the programs.
+ */
+export function warmCoverings(grain: THREE.Texture) {
+  const group = new THREE.Group();
+  const uniforms: InstallUniforms = { uFront: { value: -1 }, uCut: { value: -1 } }; // nothing shows
+  const geo = new THREE.BoxGeometry(0.01, 0.01, 0.01);
+  geo.setAttribute("aCourse", new THREE.InstancedBufferAttribute(new Float32Array([1]), 1));
+  geo.setAttribute("aSeed", new THREE.InstancedBufferAttribute(new Float32Array([0]), 1));
+  const mats: THREE.Material[] = [];
+  for (const kind of Object.keys(LOOK) as MaterialId[]) {
+    const { material, depth } = coveringMaterials(kind, grain, uniforms);
+    const mesh = new THREE.InstancedMesh(geo, material, 1);
+    mesh.setMatrixAt(0, new THREE.Matrix4());
+    mesh.setColorAt(0, new THREE.Color(0xffffff));
+    mesh.castShadow = mesh.receiveShadow = true;
+    mesh.customDepthMaterial = depth;
+    mesh.frustumCulled = false;
+    group.add(mesh);
+    mats.push(material, depth);
+  }
+  return {
+    group,
+    dispose() {
+      geo.dispose();
+      mats.forEach((m) => m.dispose());
+    },
+  };
+}
+
+export function buildCovering(kind: MaterialId, hex: string, grain: THREE.Texture, seed = 1): Covering {
+  const r = rng(seed);
+  let spec: Spec;
+  if (kind === "shingle") spec = [...shingles(hex, r), { geo: new THREE.BoxGeometry(1, 1, 1), items: slabCaps(hex, r, 0.2, 0.17, 0.05, 0.014, 0.82) }];
+  else if (kind === "slate") spec = [...slates(hex, r), { geo: new THREE.BoxGeometry(1, 1, 1), items: slabCaps(hex, r, 0.26, 0.16, 0.04, 0.012, 0.85) }];
+  else if (kind === "tile") spec = [...tiles(hex, r), ...tileCaps(hex, r)];
+  else spec = [...metal(hex, r), { geo: new THREE.BoxGeometry(1, 1, 1), items: slabCaps(hex, r, 1.2, 0.2, 0.05, 0.01, 0.95) }];
+
+  const look = LOOK[kind];
+  const uniforms: InstallUniforms = { uFront: { value: 2 }, uCut: { value: -1 } };
+  const { material, depth } = coveringMaterials(kind, grain, uniforms);
 
   const group = new THREE.Group();
   const geos: THREE.BufferGeometry[] = [];

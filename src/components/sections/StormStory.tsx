@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { stormSteps } from "@/content/company";
 import { ScrollTrigger, isPhone, useIdleGSAP } from "@/lib/gsap";
-import { after3DGate } from "@/lib/three-gate";
-import type { HouseScene } from "@/components/fx/roof3d/HouseScene";
+import { useHouseScene } from "@/lib/use-house-scene";
 import { SplitReveal, Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 
@@ -42,10 +41,8 @@ export function StormStory() {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const scene = useRef<HouseScene | null>(null);
   const [step, setStep] = useState(0);
   const stepRef = useRef(step);
-  const [live, setLive] = useState(false);
   const [near, setNear] = useState(false);
 
   // The stills load only once the stage is about a screen away (on phones this section comes early,
@@ -75,66 +72,33 @@ export function StormStory() {
     return () => io.disconnect();
   }, []);
 
-  // Desktop 3D: built when the stage is about a screen away, after load, past the gate.
-  useEffect(() => {
-    if (isPhone()) return;
-    const el = stage.current;
-    if (!el) return;
-    let house: HouseScene | null = null;
-    let disposed = false;
-    let detach = () => {};
-    let cancelGate = () => {};
-    const near = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        near.disconnect();
-        cancelGate = after3DGate(async () => {
-          const { createHouseScene } = await import("@/components/fx/roof3d/HouseScene");
-          const cv = canvas.current;
-          if (disposed || !cv) return;
-          try {
-            house = createHouseScene(cv, { mode: "story", step: stepRef.current, onFirstFrame: () => setLive(true) });
-          } catch {
-            return;
-          }
-          const h = house;
-          scene.current = h;
-          const onMove = (ev: PointerEvent) => {
-            const r = el.getBoundingClientRect();
-            h.setPointer(((ev.clientX - r.left) / r.width) * 2 - 1, 1 - ((ev.clientY - r.top) / r.height) * 2);
-          };
-          const onLeave = () => h.setPointer(0, 0);
-          const io = new IntersectionObserver(([en]) => h.setVisible(en.isIntersecting));
-          const ro = new ResizeObserver(() => h.resize());
-          el.addEventListener("pointermove", onMove);
-          el.addEventListener("pointerleave", onLeave);
-          io.observe(el);
-          ro.observe(cv);
-          detach = () => {
-            el.removeEventListener("pointermove", onMove);
-            el.removeEventListener("pointerleave", onLeave);
-            io.disconnect();
-            ro.disconnect();
-          };
-        });
-      },
-      { rootMargin: "120% 0px" },
-    );
-    near.observe(el);
-    return () => {
-      disposed = true;
-      near.disconnect();
-      cancelGate();
-      detach();
-      scene.current = null;
-      house?.dispose();
-    };
-  }, []);
+  // Desktop 3D: warmed in idle time after load (after the hero), so it is ready before it is reached.
+  const { scene, live } = useHouseScene({
+    mode: "story",
+    canvas,
+    host: stage,
+    init: () => ({ step: stepRef.current }),
+    attach: (h) => {
+      const el = stage.current!;
+      h.setStep(stepRef.current);
+      const onMove = (ev: PointerEvent) => {
+        const r = el.getBoundingClientRect();
+        h.setPointer(((ev.clientX - r.left) / r.width) * 2 - 1, 1 - ((ev.clientY - r.top) / r.height) * 2);
+      };
+      const onLeave = () => h.setPointer(0, 0);
+      el.addEventListener("pointermove", onMove);
+      el.addEventListener("pointerleave", onLeave);
+      return () => {
+        el.removeEventListener("pointermove", onMove);
+        el.removeEventListener("pointerleave", onLeave);
+      };
+    },
+  });
 
   useEffect(() => {
     stepRef.current = step;
     scene.current?.setStep(step);
-  }, [step]);
+  }, [scene, step]);
 
   useIdleGSAP(
     () => {

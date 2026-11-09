@@ -2,9 +2,9 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { MaterialId } from "@/content/materials";
 import { buildHouse } from "./house";
-import { buildCovering, onRoof, type Covering } from "./coverings";
+import { buildCovering, onRoof, warmCoverings, type Covering } from "./coverings";
 import { buildSky, buildRain, buildHail, buildLightning } from "./weather";
-import { grainTexture } from "./textures";
+import { grainTexture, paintTextures } from "./textures";
 import { rng } from "./geometry";
 
 /**
@@ -19,6 +19,12 @@ import { rng } from "./geometry";
  * - "explorer": a clear day; the roof really changes material (shingle, metal, clay, slate) course
  *   by course, swatches recolour it, and the visitor can drag to turn the house.
  * Renders only while on screen, the tab is visible and something is moving.
+ *
+ * Never stutters on the way in: `createHouseScene` builds in idle-time steps, refuses software
+ * rendering, compiles every shader (`compileAsync`) and draws one frame while the canvas is still
+ * hidden, and only then resolves, so the still can hand over. The first two seconds on screen are
+ * timed: under ~45 fps, a frame over 100 ms, or more than 8 ms of work per frame, and the scene
+ * stops and calls `onSlow`.
  */
 
 export type Weather = "storm" | "overcast" | "clear" | "golden";
@@ -37,6 +43,8 @@ export type HouseScene = {
   warm: (seconds: number) => void;
   /** Settle everything and return a PNG of one frame at w×h (for the phone and fallback stills). */
   snapshot: (w: number, h: number, zoom?: number) => string;
+  /** Resolves once the first two seconds on screen have been timed: true if smooth. */
+  probed: Promise<boolean>;
   dispose: () => void;
 };
 
@@ -44,9 +52,24 @@ type Opts = {
   mode: Mode;
   roof?: { kind: MaterialId; hex: string };
   step?: number;
-  onFirstFrame?: () => void;
   onFlash?: (f: number) => void;
+  /** Too slow in its first seconds on screen: the loop has stopped, show the still and dispose. */
+  onSlow?: (fps: number, worst: number, work: number) => void;
+  /** Called between the heavy build steps (idle time); a stand-in for tests and stills. */
+  pause?: () => Promise<void>;
 };
+
+/** Thrown when the computer has no real GPU (software rendering or a major performance caveat). */
+export class NoGpuError extends Error {}
+
+const PROBE_MS = 2000;
+const PROBE_FPS = 45;
+const PROBE_WORST = 100;
+/**
+ * Average ms of the scene's own work per frame (simulation + draw calls). Over half a 60 fps frame
+ * leaves no room for scrolling on a 60 Hz laptop, even when a fast screen still reports 45+ fps.
+ */
+const PROBE_WORK = 8;
 
 type Look = {
   top: string;
@@ -189,17 +212,72 @@ const NEW_ROOF = "#353a40";
 const ease = (t: number) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const damp = (a: number, b: number, k: number, dt: number) => a + (b - a) * (1 - Math.exp(-k * dt));
 
-export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseScene {
+const SOFTWARE_GL = /swiftshader|llvmpipe|softpipe|software|basic render|microsoft basic/i;
+
+function gpuRenderer(canvas: HTMLCanvasElement, alpha: boolean) {
+  let renderer: THREE.WebGLRenderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha, powerPreference: "high-performance", failIfMajorPerformanceCaveat: true });
+  } catch {
+    throw new NoGpuError("no hardware WebGL");
+  }
+  const gl = renderer.getContext();
+  const info = gl.getExtension("WEBGL_debug_renderer_info");
+  const name = String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER) ?? "");
+  if (SOFTWARE_GL.test(name)) {
+    renderer.dispose();
+    renderer.forceContextLoss();
+    throw new NoGpuError(`software rendering: ${name}`);
+  }
+  return renderer;
+}
+
+/**
+ * PMREMGenerator compiles its blur and GGX filters synchronously on first use (a quarter of a
+ * second on Windows/ANGLE, right on top of whatever is animating). Collect its materials with a dry
+ * run, compile them and the room on the browser's compile thread, then the real run is a few ms.
+ */
+async function precompilePmrem(renderer: THREE.WebGLRenderer, pm: THREE.PMREMGenerator, room: THREE.Scene) {
+  const inner = pm as unknown as { _renderCube?: (t: unknown, lod: number, m: THREE.Material) => void };
+  const real = inner._renderCube;
+  if (typeof real !== "function") return; // three changed: just compile on first use
+  const target = new THREE.WebGLCubeRenderTarget(16, { type: THREE.HalfFloatType });
+  const cam = new THREE.PerspectiveCamera(90, 1, 0.1, 100);
+  const compileInto = (s: THREE.Object3D) => {
+    renderer.setRenderTarget(target); // programs differ for render targets (linear, no tone mapping)
+    const p = renderer.compileAsync(s, cam).catch(() => {});
+    renderer.setRenderTarget(null);
+    return p;
+  };
+  await compileInto(room);
+  const mats = new Set<THREE.Material>();
+  inner._renderCube = (_t, _lod, m) => void mats.add(m);
+  try {
+    pm.fromScene(room, 0.04).dispose(); // the room capture is drawn (now compiled), the filters only collected
+  } finally {
+    inner._renderCube = real;
+  }
+  const filters = new THREE.Scene();
+  const box = new THREE.BoxGeometry(1, 1, 1);
+  mats.forEach((m) => filters.add(new THREE.Mesh(box, m)));
+  await compileInto(filters);
+  box.dispose();
+  target.dispose();
+}
+
+export async function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): Promise<HouseScene> {
   const { mode } = opts;
+  const pause = opts.pause ?? (() => Promise.resolve());
+  const t0 = performance.now();
   const studio = mode === "explorer"; // an architect's model on a plinth, in studio light
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: studio, powerPreference: "high-performance" });
+  const renderer = gpuRenderer(canvas, studio);
   renderer.setClearColor(0x000000, 0);
   renderer.debug.checkShaderErrors = false;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
-  const maxDpr = mode === "hero" ? 1.5 : 1.75;
+  const maxDpr = 1.5;
 
   const scene = new THREE.Scene();
   if (!studio) scene.fog = new THREE.Fog(0x000000, 30, 160);
@@ -221,13 +299,15 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
   flash.target.position.set(0, 0, 3);
   scene.add(flash, flash.target);
 
-  // ── world ──
+  // ── world ── (built in steps, with a breath for the browser between the heavy ones)
   const sky = buildSky();
   if (!studio) scene.add(sky.mesh);
+  await paintTextures(pause);
   const house = buildHouse({ model: studio });
   scene.add(house.group);
   const grain = grainTexture();
   grain.repeat.set(1, 1);
+  await pause();
 
   const weathered = mode === "story";
   // the storm hero gets a lighter "pewter" shingle so the courses and the hail read in the dark
@@ -235,12 +315,15 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
   let incoming: Covering | null = null;
   scene.add(base.group);
   let install = { t: 1, dur: 2.4, running: false };
+  await pause();
 
   const rain = mode === "explorer" ? null : buildRain();
   if (rain) scene.add(rain.mesh);
   const hail = mode === "explorer" ? null : buildHail(mode === "hero" ? 1800 : 1400);
   if (hail) scene.add(hail.mesh);
   const lightning = buildLightning(mode === "hero" ? 1.6 : 0.8);
+  // the explorer's other roofs use shader variants of their own: compile them now, not on the first click
+  const variants = studio ? warmCoverings(grain) : null;
 
   // ── story props ──
   const props = mode === "story" ? buildStoryProps(scene) : null;
@@ -248,6 +331,7 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
   let storyInstall = 0; // 0 = old roof, 1 = new roof
   let storyInstallTarget = 0;
   if (mode === "story") {
+    await pause();
     storyNew = buildCovering("shingle", NEW_ROOF, grain, 2);
     const done = (opts.step ?? 0) >= 4; // arriving mid-story: the right roof is already on
     storyInstall = storyInstallTarget = done ? 1 : 0;
@@ -341,8 +425,10 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
   // Metal, glazed clay and slate need something to reflect: the model gets a soft studio.
   let env: THREE.WebGLRenderTarget | null = null;
   if (studio) {
+    await pause();
     const pm = new THREE.PMREMGenerator(renderer);
     const room = new RoomEnvironment();
+    await precompilePmrem(renderer, pm, room);
     env = pm.fromScene(room, 0.04);
     room.dispose();
     pm.dispose();
@@ -392,10 +478,46 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
   let last = 0;
   let time = 0;
   let raf = 0;
-  let visible = true;
+  let visible = false; // until the caller's IntersectionObserver says so
   let ready = false;
   let disposed = false;
-  let first = true;
+  let stopped = false; // too slow: the loop never runs again
+
+  // The first two seconds on screen are timed (after three warm-up frames). The loop keeps
+  // drawing while they are, so even a calm scene gets measured.
+  const probe = { on: true, n: 0, prev: 0, t0: 0, frames: 0, worst: 0, work: 0 };
+  let settleProbe: (smooth: boolean) => void = () => {};
+  const probed = new Promise<boolean>((r) => (settleProbe = r));
+  const resetProbe = () => Object.assign(probe, { n: 0, prev: 0, t0: 0, frames: 0, worst: 0, work: 0 });
+  const watch = (now: number, work: number) => {
+    if (!probe.on) return false;
+    if (probe.prev) {
+      const gap = now - probe.prev;
+      probe.n++;
+      if (probe.n === 3) probe.t0 = now;
+      else if (probe.n > 3) {
+        probe.frames++;
+        probe.worst = Math.max(probe.worst, gap);
+        probe.work += work;
+      }
+    }
+    probe.prev = now;
+    const span = probe.t0 ? now - probe.t0 : 0;
+    const fps = span ? (probe.frames * 1000) / span : 60;
+    if (probe.worst > PROBE_WORST || span >= PROBE_MS) {
+      probe.on = false;
+      const work = probe.work / Math.max(1, probe.frames);
+      const smooth = fps >= PROBE_FPS && probe.worst <= PROBE_WORST && work <= PROBE_WORK;
+      performance.mark(`3d:${mode}:probe`, { detail: { fps: Math.round(fps), worst: Math.round(probe.worst), work: +work.toFixed(2), smooth } });
+      settleProbe(smooth);
+      if (!smooth) {
+        stopped = true;
+        opts.onSlow?.(fps, probe.worst, work);
+      }
+      return false;
+    }
+    return true;
+  };
 
   /** Advance everything by dt. Returns true while anything is still moving. */
   const update = (dt: number) => {
@@ -479,26 +601,27 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
     return busy;
   };
 
-  const frame = () => {
+  const frame = (now: number) => {
     raf = 0;
-    if (disposed || !visible || document.hidden || !ready) return;
-    const now = performance.now();
+    if (disposed || stopped || !visible || document.hidden || !ready) return;
     const dt = Math.min((now - (last || now - 16)) / 1000, 1 / 20);
     last = now;
+    const w0 = performance.now();
     const busy = update(dt);
     renderer.render(scene, camera);
-    if (first) {
-      first = false;
-      opts.onFirstFrame?.();
-    }
-    if (busy) raf = requestAnimationFrame(frame);
+    const timing = watch(now, performance.now() - w0);
+    if (stopped) return;
+    if (busy || timing) raf = requestAnimationFrame(frame);
     else last = 0;
   };
   const invalidate = () => {
-    if (raf || disposed || !visible || !ready || document.hidden) return;
+    if (raf || disposed || stopped || !visible || !ready || document.hidden) return;
     raf = requestAnimationFrame(frame);
   };
-  const onVis = () => invalidate();
+  const onVis = () => {
+    if (document.hidden) resetProbe(); // a hidden tab's frames say nothing about this computer
+    invalidate();
+  };
   document.addEventListener("visibilitychange", onVis);
 
   function finishInstall() {
@@ -526,16 +649,39 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
   };
   resize();
   placeCamera();
+  await pause();
 
-  // Compile shaders off the main thread where the browser allows it, then start.
-  renderer
-    .compileAsync(scene, camera)
-    .catch(() => {})
-    .then(() => {
-      if (disposed) return;
-      ready = true;
-      invalidate();
-    });
+  // Every shader before anything shows: props that only appear in later steps and the explorer's
+  // other roofs are switched on for the compile and one hidden frame (which also builds the shadow
+  // programs and uploads every texture), then put back and drawn for real.
+  const hidden: THREE.Object3D[] = [];
+  scene.traverse((o) => {
+    if (!o.visible) {
+      hidden.push(o);
+      o.visible = true;
+    }
+  });
+  if (variants) scene.add(variants.group);
+  await renderer.compileAsync(scene, camera).catch(() => {});
+  // upload the textures one idle slot at a time (mipmaps included), not all inside the first frame
+  const textures = new Set<THREE.Texture>();
+  scene.traverse((o) => {
+    const m = (o as THREE.Mesh).material;
+    for (const mm of Array.isArray(m) ? m : m ? [m] : [])
+      for (const v of Object.values(mm)) if (v instanceof THREE.Texture) textures.add(v);
+  });
+  for (const t of textures) {
+    renderer.initTexture(t);
+    await pause();
+  }
+  renderer.render(scene, camera);
+  if (variants) scene.remove(variants.group);
+  hidden.forEach((o) => (o.visible = false));
+  await pause();
+  update(0);
+  renderer.render(scene, camera);
+  ready = true;
+  performance.mark(`3d:${mode}:ready`, { detail: { ms: Math.round(performance.now() - t0) } });
 
   let seed = 3;
   const api: HouseScene = {
@@ -589,6 +735,7 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
         cancelAnimationFrame(raf);
         raf = 0;
         last = 0;
+        resetProbe();
       }
     },
     resize,
@@ -625,8 +772,10 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
       resize();
       return url;
     },
+    probed,
     dispose() {
       disposed = true;
+      settleProbe(true);
       cancelAnimationFrame(raf);
       document.removeEventListener("visibilitychange", onVis);
       house.dispose();
@@ -639,7 +788,9 @@ export function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): HouseSc
       props?.dispose();
       grain.dispose();
       env?.dispose();
+      variants?.dispose();
       renderer.dispose();
+      renderer.forceContextLoss(); // hand the GPU memory back at once
     },
   };
   base.material.userData.hex = opts.roof?.hex;

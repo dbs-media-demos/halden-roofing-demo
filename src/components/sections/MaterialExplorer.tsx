@@ -4,8 +4,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as R
 import clsx from "clsx";
 import { materials, type MaterialId } from "@/content/materials";
 import { gsap, prefersReducedMotion, isPhone } from "@/lib/gsap";
-import { after3DGate } from "@/lib/three-gate";
-import type { HouseScene } from "@/components/fx/roof3d/HouseScene";
+import { useHouseScene } from "@/lib/use-house-scene";
 import { SplitReveal, Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 
@@ -50,13 +49,23 @@ export function MaterialExplorer() {
   const mat = materials.find((m) => m.id === active)!;
   const color = mat.swatches[swatch].hex;
   const [shown, setShown] = useState([{ src: still("shingle", 0), key: 0 }]);
-  const [live, setLive] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const scene = useRef<HouseScene | null>(null);
   const roof = useRef({ kind: active, hex: color });
   const drag = useRef<number | null>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Desktop 3D: warmed in idle time after load (after the hero and the storm story).
+  const { scene, live } = useHouseScene({
+    mode: "explorer",
+    canvas,
+    host: stage,
+    init: () => ({ roof: roof.current }),
+    attach: (h) => {
+      h.setRoof(roof.current.kind, roof.current.hex); // a choice made while it was warming up
+      return () => {};
+    },
+  });
 
   const install = (m: MaterialId, i: number) => {
     const hex = materials.find((x) => x.id === m)!.swatches[i].hex;
@@ -64,53 +73,6 @@ export function MaterialExplorer() {
     scene.current?.setRoof(m, hex);
     setShown((prev) => [...prev.slice(-1), { src: still(m, i), key: (prev.at(-1)?.key ?? 0) + 1 }]);
   };
-
-  // Desktop 3D: built when the stage is about a screen away, after load, past the gate.
-  useEffect(() => {
-    if (isPhone()) return;
-    const el = stage.current;
-    if (!el) return;
-    let house: HouseScene | null = null;
-    let disposed = false;
-    let detach = () => {};
-    let cancelGate = () => {};
-    const near = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        near.disconnect();
-        cancelGate = after3DGate(async () => {
-          const { createHouseScene } = await import("@/components/fx/roof3d/HouseScene");
-          const cv = canvas.current;
-          if (disposed || !cv) return;
-          try {
-            house = createHouseScene(cv, { mode: "explorer", roof: roof.current, onFirstFrame: () => setLive(true) });
-          } catch {
-            return;
-          }
-          const h = house;
-          scene.current = h;
-          const io = new IntersectionObserver(([en]) => h.setVisible(en.isIntersecting));
-          const ro = new ResizeObserver(() => h.resize());
-          io.observe(el);
-          ro.observe(cv);
-          detach = () => {
-            io.disconnect();
-            ro.disconnect();
-          };
-        });
-      },
-      { rootMargin: "120% 0px" },
-    );
-    near.observe(el);
-    return () => {
-      disposed = true;
-      near.disconnect();
-      cancelGate();
-      detach();
-      scene.current = null;
-      house?.dispose();
-    };
-  }, []);
 
   // Drag to turn the house; hovering leans the camera a little.
   const onPointerDown = (e: ReactPointerEvent<HTMLCanvasElement>) => {
