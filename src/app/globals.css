@@ -353,6 +353,35 @@ html.lenis body {
   }
 }
 
+/* Lightning in the 3D storm lights the headline (Hero sets --flash from the scene, 0 → ~1). */
+.hero-root {
+  --flash: 0;
+}
+.hero-title {
+  text-shadow: 0 0 calc(var(--flash) * 2.6rem) rgb(205 222 255 / calc(var(--flash) * 0.6));
+}
+.hero-title .text-copper {
+  filter: brightness(calc(1 + var(--flash) * 0.55));
+}
+
+/* Material explorer: the model sits in a soft studio; a new roof's still wipes in eave → ridge. */
+.mat-studio {
+  background:
+    radial-gradient(70% 55% at 50% 42%, rgb(196 113 60 / 0.07), transparent 70%),
+    radial-gradient(120% 95% at 50% 36%, #2a3a49 0%, #172330 52%, #0e1620 100%);
+}
+@keyframes mat-still-in {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.mat-still-in {
+  animation: mat-still-in 850ms var(--ease-out-expo) both;
+}
+
 /* ─────────────────────────── misc ─────────────────────────── */
 
 @keyframes marquee {
@@ -588,23 +617,6 @@ html.lenis body {
   transform: translate(-50%, 6px) scale(1);
 }
 
-/* ─────────────────────── house illustration ─────────────────────── */
-
-@keyframes course-in {
-  from {
-    opacity: 0;
-    transform: translateY(-7px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.roof-course {
-  transform-box: fill-box;
-  animation: course-in 520ms var(--ease-out-expo) both;
-}
-
 /* Services inspection laser: the band it has just passed reads as a thermal scan
    (copper hue on the luminance below, so stone type glows and ink stays dark). */
 .scan-glow {
@@ -833,23 +845,6 @@ html.lenis body {
   }
 }
 
-@keyframes sweep-x {
-  from {
-    transform: translateX(-60px);
-  }
-  to {
-    transform: translateX(640px);
-  }
-}
-@keyframes scan-y {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(80px);
-  }
-}
 @keyframes flash {
   0%,
   80%,
@@ -860,23 +855,6 @@ html.lenis body {
     opacity: 0.4;
   }
 }
-@keyframes hit-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.35);
-    opacity: 0.55;
-  }
-}
-.hit {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: hit-pulse 1.6s ease-in-out infinite;
-}
-
 /* ─────────────────────── map ─────────────────────── */
 
 @keyframes hail-march {
@@ -1442,15 +1420,17 @@ input.range::-moz-range-thumb {
     position: static;
     height: 10.5rem;
   }
-  [data-ph-stage] :not(.roof-course) {
+  [data-ph-stage] * {
     animation: none !important;
   }
   [data-ph-stage] p {
     backdrop-filter: none;
   }
   /* The whole house and its warranty seal fit in the shorter picture */
-  .ph-stage-house {
-    width: 94%;
+  .ph-stage-seal {
+    top: 12%;
+    right: 4%;
+    width: 3.6rem;
   }
   .ph-step {
     --step-h: 1rem;
@@ -1651,20 +1631,11 @@ input.range::-moz-range-thumb {
   }
 
   /* ── Materials: the tool the visitor drives ── */
-  .ph-mat-stage > [aria-hidden] {
-    animation: none;
-  }
-  .ph-mat-stage > .relative.flex-1 {
-    justify-content: center;
-    padding: 0.25rem 0 0;
-  }
-  .ph-mat-stage svg {
-    width: 84%;
+  .mat-studio {
+    aspect-ratio: 16 / 10.5;
   }
   .ph-mat-label {
     padding: 0.4rem 0.875rem;
-    background: var(--stone);
-    backdrop-filter: none;
   }
   .ph-mat-tabs {
     display: grid;

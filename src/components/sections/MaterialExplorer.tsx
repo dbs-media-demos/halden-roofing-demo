@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
 import clsx from "clsx";
-import { HouseArt, type RoofLayer } from "@/components/house/HouseArt";
 import { materials, type MaterialId } from "@/content/materials";
 import { gsap, prefersReducedMotion, isPhone } from "@/lib/gsap";
+import { after3DGate } from "@/lib/three-gate";
+import type { HouseScene } from "@/components/fx/roof3d/HouseScene";
 import { SplitReveal, Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 
@@ -33,39 +34,114 @@ function Tween({ value, className }: { value: number; className?: string }) {
   );
 }
 
-const mono = { fontFamily: "var(--font-plex-mono)", fontSize: 11, letterSpacing: "0.12em" } as const;
+/** A still of the model rendered from the 3D scene (public/images/3d/roofs), one per material and colour. */
+const still = (m: MaterialId, i: number) => `/images/3d/roofs/${m}-${i}`;
 
-/** Signature #2 — swap the roof between four materials; swatches recolour it. */
+/**
+ * Signature #2 — try a new roof on. The house is an architect's model on a lawn plinth in studio
+ * light (three.js, desktop only, behind lib/three-gate): every material is really built, shingle tab
+ * by tab, panel by panel, barrel by barrel, and a new choice tears the old roof off and lays the new
+ * one course by course from the eaves. Swatches recolour it; drag to turn the house.
+ * Phones and desktops without 3D get stills rendered from the same model, wiped in eave to ridge.
+ */
 export function MaterialExplorer() {
   const [active, setActive] = useState<MaterialId>("shingle");
   const [swatch, setSwatch] = useState(0);
   const mat = materials.find((m) => m.id === active)!;
   const color = mat.swatches[swatch].hex;
-  const [layers, setLayers] = useState<{ base: RoofLayer; incoming: RoofLayer | null }>({
-    base: { material: "shingle", color: materials[0].swatches[0].hex, key: "init" },
-    incoming: null,
-  });
+  const [shown, setShown] = useState([{ src: still("shingle", 0), key: 0 }]);
+  const [live, setLive] = useState(false);
+  const stage = useRef<HTMLDivElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const scene = useRef<HouseScene | null>(null);
+  const roof = useRef({ kind: active, hex: color });
+  const drag = useRef<number | null>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const install = (m: MaterialId, c: string) => {
-    setLayers((prev) => ({
-      base: prev.incoming ?? prev.base,
-      incoming: { material: m, color: c, key: `${m}-${c}-${Date.now()}` },
-    }));
+  const install = (m: MaterialId, i: number) => {
+    const hex = materials.find((x) => x.id === m)!.swatches[i].hex;
+    roof.current = { kind: m, hex };
+    scene.current?.setRoof(m, hex);
+    setShown((prev) => [...prev.slice(-1), { src: still(m, i), key: (prev.at(-1)?.key ?? 0) + 1 }]);
   };
+
+  // Desktop 3D: built when the stage is about a screen away, after load, past the gate.
+  useEffect(() => {
+    if (isPhone()) return;
+    const el = stage.current;
+    if (!el) return;
+    let house: HouseScene | null = null;
+    let disposed = false;
+    let detach = () => {};
+    let cancelGate = () => {};
+    const near = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        near.disconnect();
+        cancelGate = after3DGate(async () => {
+          const { createHouseScene } = await import("@/components/fx/roof3d/HouseScene");
+          const cv = canvas.current;
+          if (disposed || !cv) return;
+          try {
+            house = createHouseScene(cv, { mode: "explorer", roof: roof.current, onFirstFrame: () => setLive(true) });
+          } catch {
+            return;
+          }
+          const h = house;
+          scene.current = h;
+          const io = new IntersectionObserver(([en]) => h.setVisible(en.isIntersecting));
+          const ro = new ResizeObserver(() => h.resize());
+          io.observe(el);
+          ro.observe(cv);
+          detach = () => {
+            io.disconnect();
+            ro.disconnect();
+          };
+        });
+      },
+      { rootMargin: "120% 0px" },
+    );
+    near.observe(el);
+    return () => {
+      disposed = true;
+      near.disconnect();
+      cancelGate();
+      detach();
+      scene.current = null;
+      house?.dispose();
+    };
+  }, []);
+
+  // Drag to turn the house; hovering leans the camera a little.
+  const onPointerDown = (e: ReactPointerEvent<HTMLCanvasElement>) => {
+    if (e.pointerType !== "mouse" || !scene.current) return;
+    drag.current = e.clientX;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: ReactPointerEvent<HTMLCanvasElement>) => {
+    const h = scene.current;
+    if (!h) return;
+    if (drag.current !== null) {
+      h.drag(e.clientX - drag.current);
+      drag.current = e.clientX;
+    }
+    const r = e.currentTarget.getBoundingClientRect();
+    h.setPointer(((e.clientX - r.left) / r.width) * 2 - 1, 1 - ((e.clientY - r.top) / r.height) * 2);
+  };
+  const onPointerUp = () => (drag.current = null);
 
   const choose = (id: MaterialId) => {
     if (id === active) return;
     const m = materials.find((x) => x.id === id)!;
     setActive(id);
     setSwatch(0);
-    install(id, m.swatches[0].hex);
+    install(m.id, 0);
   };
 
   const chooseSwatch = (i: number) => {
     if (i === swatch) return;
     setSwatch(i);
-    install(active, mat.swatches[i].hex);
+    install(active, i);
   };
 
   const onTabKey = (e: KeyboardEvent, i: number) => {
@@ -97,30 +173,47 @@ export function MaterialExplorer() {
 
         <div className="mt-14 grid gap-8 lg:grid-cols-12 lg:gap-10">
           {/* Stage */}
-          <div className="ph-mat-stage relative flex flex-col overflow-hidden rounded-[2px] lg:col-span-7">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#86a8c2] via-[#b9cedc] to-[#e9e1d2]" />
-            <div aria-hidden className="absolute -left-10 top-10 h-16 w-72 rounded-full bg-white/50 blur-2xl [animation:drift_24s_ease-in-out_infinite_alternate]" />
-            <div aria-hidden className="absolute right-0 top-24 h-12 w-56 rounded-full bg-white/40 blur-2xl [animation:drift_30s_ease-in-out_infinite_alternate-reverse]" />
-            <div className="relative flex flex-1 items-end px-2 pb-3 pt-10 md:px-8 md:pt-14">
-              <HouseArt
-                base={layers.base}
-                incoming={layers.incoming}
-                title={`House illustration with a ${mat.name.toLowerCase()} roof in ${mat.swatches[swatch].name}`}
-                className="h-auto w-full"
+          <div className="ph-mat-stage relative flex flex-col self-start overflow-hidden rounded-[2px] border border-line lg:sticky lg:top-[calc(var(--header-h)+2rem)] lg:col-span-7">
+            <div ref={stage} className="mat-studio relative aspect-[16/11] w-full">
+              {shown.map((l, i) => (
+                <picture key={l.key} className={clsx("absolute inset-0", i > 0 && "mat-still-in")}>
+                  <source type="image/avif" srcSet={`${l.src}.avif`} />
+                  {/* stills of the 3D model, pre-sized (next/image would only re-encode them) */}
+                  <img
+                    src={`${l.src}.webp`}
+                    alt={i === shown.length - 1 ? `Model of a house with a ${mat.name.toLowerCase()} roof in ${mat.swatches[swatch].name}` : ""}
+                    width={1100}
+                    height={756}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-contain"
+                  />
+                </picture>
+              ))}
+              <canvas
+                ref={canvas}
+                aria-hidden
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerUp}
+                onPointerLeave={() => scene.current?.setPointer(0, 0)}
+                className={clsx(
+                  "ph-hide absolute inset-0 h-full w-full cursor-grab transition-opacity duration-[1.2s] active:cursor-grabbing",
+                  live ? "opacity-100" : "pointer-events-none opacity-0",
+                )}
+              />
+              <p
+                aria-hidden
+                className={clsx("ph-hide t-eyebrow pointer-events-none absolute bottom-4 left-5 text-faint transition-opacity duration-700", live ? "opacity-100" : "opacity-0")}
               >
-                <g style={mono} fill="#0e1620" opacity="0.75">
-                  <line x1="520" y1="212" x2="600" y2="150" stroke="#0e1620" strokeWidth="1" />
-                  <text x="604" y="146">RIDGE</text>
-                  <line x1="126" y1="296" x2="70" y2="250" stroke="#0e1620" strokeWidth="1" />
-                  <text x="30" y="242">EAVE</text>
-                  <text x="330" y="196">PITCH 6/12</text>
-                </g>
-              </HouseArt>
+                ← Drag to turn the house →
+              </p>
             </div>
-            <div className="ph-mat-label relative flex items-center justify-between border-t border-ink/10 bg-stone/70 px-5 py-3 text-ink backdrop-blur">
+            <div className="ph-mat-label relative flex items-center justify-between border-t border-line bg-ink px-5 py-3 text-stone">
               <span className="t-spec">{mat.name}</span>
               <span className="t-spec flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full border border-ink/30" style={{ background: color }} />
+                <span className="h-3 w-3 rounded-full border border-stone/30" style={{ background: color }} />
                 {mat.swatches[swatch].name}
               </span>
             </div>

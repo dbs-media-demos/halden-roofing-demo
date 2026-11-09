@@ -103,10 +103,14 @@ Optimized copies live in `src/assets/photos/` (served through next/image) and `p
 | tx-ranch-metal.jpg | https://unsplash.com/photos/6FvcNx2YgyE | Dennis Lamberth (@drlamberth) |
 | tx-ranch-porch.jpg | https://unsplash.com/photos/595z5mM1meY | Dennis Lamberth (@drlamberth) |
 
+## 3D renders
+
+`3d/*` (hero storm, storm-story and material-explorer stills) are rendered from the site's own three.js scene (`src/components/fx/roof3d`, built from primitives, no third-party models or textures) by `_src/stills/render.mjs`.
+
 ## Video
 
 | File | Source | Author |
 |---|---|---|
-| video/hero-drone.mp4 (+ poster-hero-drone.jpg) | https://www.pexels.com/video/4770380/ | David McBee |
+| poster-hero-drone.jpg (still from a drone film no longer used on the site) | https://www.pexels.com/video/4770380/ | David McBee |
 | video/storm-front.mp4 (+ poster-storm-front.jpg) | https://www.pexels.com/video/29545625/ | Ndumiso Mvelase |
 | video/tear-off.mp4 (+ poster-tear-off.jpg) | https://www.pexels.com/video/4198810/ | K (Pexels) |

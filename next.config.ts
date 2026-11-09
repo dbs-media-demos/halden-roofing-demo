@@ -10,6 +10,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Keep the inlined display font and the site CSS as two parallel requests (the default merge
+    // depends on their sizes; one 54 KB file arrived ~0.4 s later on a throttled phone).
+    cssChunking: { type: "graph", requestCost: 0 },
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [60, 75, 85],

@@ -2,22 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import { HouseArt } from "@/components/house/HouseArt";
-import { HailCanvas } from "@/components/fx/HailCanvas";
 import { stormSteps } from "@/content/company";
 import { ScrollTrigger, isPhone, useIdleGSAP } from "@/lib/gsap";
+import { after3DGate } from "@/lib/three-gate";
+import type { HouseScene } from "@/components/fx/roof3d/HouseScene";
 import { SplitReveal, Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
-
-const OLD = { material: "shingle" as const, color: "#5d5850", key: "old" };
-const NEW = { material: "shingle" as const, color: "#353a40", key: "new" };
-
-const skies = [
-  { from: "#1b2a2a", to: "#4c5c5a", steps: [0] }, // green-grey hail sky
-  { from: "#3a4855", to: "#8391a0", steps: [1, 2, 3] }, // overcast
-  { from: "#6f93b3", to: "#c9d6de", steps: [4, 5] }, // clearing
-  { from: "#3d4f6b", to: "#e8a66d", steps: [6] }, // golden dusk
-];
 
 const logs = [
   "INSPECTION · 21-POINT · SLOPES 4/4",
@@ -29,30 +19,47 @@ const logs = [
   "WARRANTY #HR-10482 · 25 YRS · REGISTERED",
 ];
 
-const hits: [number, number][] = [
-  [228, 268],
-  [352, 236],
-  [418, 262],
-  [486, 228],
-  [560, 276],
-  [612, 284],
-  [300, 290],
-  [458, 284],
+/**
+ * Stills rendered from the same 3D scene (public/images/3d/story), one per look: the storm, the
+ * inspection, the new roof, golden hour. Desktops without 3D cross-fade them by step; phones get the
+ * storm still and, once the picture is in view, the finished roof at golden hour.
+ */
+const stills = [
+  { id: "s0", steps: [0], phone: true },
+  { id: "s1", steps: [1, 2, 3], phone: false },
+  { id: "s4", steps: [4, 5], phone: false },
+  { id: "s6", steps: [6], phone: true },
 ];
 
 /**
  * Signature #3 — "Storm damage? Here's exactly what happens."
- * A sticky house illustration whose sky, weather and roof change as seven
- * numbered steps scroll past.
+ * A sticky stage beside seven numbered steps. On desktop it is the Halden house in real-time 3D
+ * (three.js, behind lib/three-gate): each step changes the weather, the camera and the props:
+ * hail on the old roof, hits circled on the shingles, the chalked test square, tear-off and the new
+ * roof course by course, nails on the drive and the magnet sweeper, then golden hour and the seal.
  */
 export function StormStory() {
   const root = useRef<HTMLElement>(null);
-  const svg = useRef<SVGSVGElement>(null);
   const stage = useRef<HTMLDivElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const scene = useRef<HouseScene | null>(null);
   const [step, setStep] = useState(0);
+  const stepRef = useRef(step);
+  const [live, setLive] = useState(false);
+  const [near, setNear] = useState(false);
+
+  // The stills load only once the stage is about a screen away (on phones this section comes early,
+  // and native lazy loading would fetch them with the first screen).
+  useEffect(() => {
+    const el = stage.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && (setNear(true), io.disconnect()), { rootMargin: "100% 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   // Phones: nothing pinned, the steps simply stack. This is their one roofing touch: when the
-  // house comes into view the new roof goes on course by course and the warranty seal lands, once.
+  // picture comes into view the storm gives way to the finished roof at golden hour, once.
   useEffect(() => {
     const el = stage.current;
     if (!el || !isPhone()) return;
@@ -67,6 +74,67 @@ export function StormStory() {
     io.observe(el);
     return () => io.disconnect();
   }, []);
+
+  // Desktop 3D: built when the stage is about a screen away, after load, past the gate.
+  useEffect(() => {
+    if (isPhone()) return;
+    const el = stage.current;
+    if (!el) return;
+    let house: HouseScene | null = null;
+    let disposed = false;
+    let detach = () => {};
+    let cancelGate = () => {};
+    const near = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        near.disconnect();
+        cancelGate = after3DGate(async () => {
+          const { createHouseScene } = await import("@/components/fx/roof3d/HouseScene");
+          const cv = canvas.current;
+          if (disposed || !cv) return;
+          try {
+            house = createHouseScene(cv, { mode: "story", step: stepRef.current, onFirstFrame: () => setLive(true) });
+          } catch {
+            return;
+          }
+          const h = house;
+          scene.current = h;
+          const onMove = (ev: PointerEvent) => {
+            const r = el.getBoundingClientRect();
+            h.setPointer(((ev.clientX - r.left) / r.width) * 2 - 1, 1 - ((ev.clientY - r.top) / r.height) * 2);
+          };
+          const onLeave = () => h.setPointer(0, 0);
+          const io = new IntersectionObserver(([en]) => h.setVisible(en.isIntersecting));
+          const ro = new ResizeObserver(() => h.resize());
+          el.addEventListener("pointermove", onMove);
+          el.addEventListener("pointerleave", onLeave);
+          io.observe(el);
+          ro.observe(cv);
+          detach = () => {
+            el.removeEventListener("pointermove", onMove);
+            el.removeEventListener("pointerleave", onLeave);
+            io.disconnect();
+            ro.disconnect();
+          };
+        });
+      },
+      { rootMargin: "120% 0px" },
+    );
+    near.observe(el);
+    return () => {
+      disposed = true;
+      near.disconnect();
+      cancelGate();
+      detach();
+      scene.current = null;
+      house?.dispose();
+    };
+  }, []);
+
+  useEffect(() => {
+    stepRef.current = step;
+    scene.current?.setStep(step);
+  }, [step]);
 
   useIdleGSAP(
     () => {
@@ -83,8 +151,6 @@ export function StormStory() {
     },
     root,
   );
-
-  const showHits = step >= 1 && step <= 3;
 
   return (
     <section ref={root} aria-labelledby="storm-title" className="theme-ink relative py-24 md:py-36">
@@ -107,131 +173,59 @@ export function StormStory() {
         <div className="relative mt-14 grid gap-10 lg:grid-cols-12">
           {/* Sticky stage */}
           <div ref={stage} data-ph-stage className="sticky top-2 z-10 h-[44svh] lg:top-[calc(var(--header-h)+1.5rem)] lg:col-span-7 lg:h-[calc(100svh-var(--header-h)-3rem)]">
-            <div className="relative h-full overflow-hidden rounded-[2px] border border-line">
-              {skies.map((s, i) => (
-                <div
-                  key={i}
-                  aria-hidden
-                  className="absolute inset-0 transition-opacity duration-[1400ms]"
-                  style={{ background: `linear-gradient(to bottom, ${s.from}, ${s.to})`, opacity: s.steps.includes(step) ? 1 : 0 }}
-                />
-              ))}
-              {/* clouds */}
-              <div aria-hidden className={clsx("absolute inset-0 transition-opacity duration-1000", step >= 6 && "opacity-40")}>
-                <div className="absolute -left-20 top-[8%] h-24 w-[70%] rounded-full bg-[#0e1620]/35 blur-3xl [animation:drift_18s_ease-in-out_infinite_alternate]" />
-                <div className="absolute right-[-10%] top-[18%] h-20 w-[55%] rounded-full bg-[#0e1620]/30 blur-3xl [animation:drift_24s_ease-in-out_infinite_alternate-reverse]" />
-              </div>
-              {/* lightning */}
-              <div aria-hidden className={clsx("absolute inset-0 bg-white opacity-0", step === 0 && "[animation:flash_5s_linear_infinite]")} />
-              {/* sun at dusk */}
-              <div
-                aria-hidden
-                className="absolute right-[14%] top-[12%] h-24 w-24 rounded-full bg-[#ffd4a1] blur-md transition-[opacity,transform] duration-[1600ms]"
-                style={{ opacity: step === 6 ? 0.9 : 0, transform: step === 6 ? "translateY(0)" : "translateY(60px)" }}
-              />
-
-              {/* horizon: far skyline + tree line (tinted by the sky) */}
-              <svg aria-hidden viewBox="0 0 800 200" preserveAspectRatio="xMidYMax slice" className="absolute inset-x-0 bottom-[8%] h-[38%] w-full text-ink transition-opacity duration-1000" style={{ opacity: step === 6 ? 0.55 : 0.35 }}>
-                <path d="M0 150 C120 128 220 140 330 132 S560 120 800 138 V200 H0Z" fill="currentColor" opacity="0.6" />
-                <g fill="currentColor" opacity="0.8">
-                  <rect x="520" y="86" width="16" height="50" />
-                  <rect x="540" y="64" width="14" height="72" />
-                  <rect x="558" y="96" width="20" height="40" />
-                  <rect x="582" y="74" width="12" height="62" />
-                  <polygon points="598,136 598,80 606,70 614,80 614,136" />
-                  <rect x="618" y="104" width="18" height="32" />
-                </g>
-                {[40, 90, 150, 230, 300, 360, 690, 740].map((x, i) => (
-                  <ellipse key={x} cx={x} cy={140 - (i % 3) * 4} rx={18 + (i % 2) * 8} ry={14 + (i % 3) * 4} fill="currentColor" />
-                ))}
-              </svg>
-
-              <div className="ph-stage-house absolute bottom-0 left-1/2 w-[112%] -translate-x-1/2 md:w-[104%]">
-                <HouseArt
-                  svgRef={svg}
-                  base={OLD}
-                  incoming={step >= 4 ? NEW : null}
-                  installFrom="eave"
-                  strips={10}
-                  stagger={120}
-                  glow={step === 6}
-                  className="h-auto w-full"
-                  title="Illustration of a house moving through each step of a storm-damage roof replacement"
+            <div className="relative h-full overflow-hidden rounded-[2px] border border-line bg-slate">
+              {near &&
+                stills.map((s) => (
+                <picture
+                  key={s.id}
+                  className={clsx("absolute inset-0 transition-opacity duration-[1200ms]", !s.phone && "ph-hide", s.steps.includes(step) ? "opacity-100" : "opacity-0")}
                 >
-                  {/* inspection scan + ladder */}
-                  <g className="transition-opacity duration-700" opacity={step === 0 ? 1 : 0}>
-                    <line x1="140" x2="680" y1="222" y2="222" stroke="var(--copper)" strokeWidth="2.5" style={{ animation: "scan-y 3s ease-in-out infinite" }} />
-                  </g>
-                  <g className="transition-opacity duration-700" opacity={step <= 4 ? 1 : 0} stroke="#0e1620" strokeWidth="3">
-                    <line x1="706" y1="440" x2="676" y2="286" />
-                    <line x1="724" y1="440" x2="694" y2="286" />
-                    {[420, 392, 364, 336, 308].map((y, i) => (
-                      <line key={y} x1={702 - i * 5.4} x2={720 - i * 5.4} y1={y} y2={y} />
-                    ))}
-                  </g>
-                  {/* hits */}
-                  <g className="transition-opacity duration-500" opacity={showHits ? 1 : 0}>
-                    {hits.map(([x, y], i) => (
-                      <circle key={i} cx={x} cy={y} r="9" fill="none" stroke="var(--copper)" strokeWidth="2.5" className="hit" style={{ animationDelay: `${i * 0.15}s` }} />
-                    ))}
-                  </g>
-                  {/* test square */}
-                  <g className="transition-opacity duration-500" opacity={step === 3 ? 1 : 0}>
-                    <rect x="388" y="232" width="84" height="46" fill="rgba(255,255,255,.08)" stroke="#f2eee7" strokeWidth="2" strokeDasharray="6 5" />
-                    <text x="392" y="226" fill="#f2eee7" style={{ fontFamily: "var(--font-plex-mono)", fontSize: 11, letterSpacing: "0.1em" }}>
-                      10×10 TEST SQUARE
-                    </text>
-                  </g>
-                  {/* nails + magnet sweeper */}
-                  <g>
-                    {Array.from({ length: 14 }, (_, i) => (
-                      <rect
-                        key={i}
-                        x={110 + i * 44 + (i % 3) * 7}
-                        y={436 - (i % 2) * 2}
-                        width="6"
-                        height="1.8"
-                        fill="#c9ccd0"
-                        className="transition-opacity duration-300"
-                        opacity={step === 4 ? 1 : 0}
-                      />
-                    ))}
-                    {step === 5 && (
-                      <g style={{ animation: "sweep-x 3.2s ease-in-out infinite alternate" }}>
-                        <rect x="100" y="424" width="44" height="10" rx="2" fill="var(--copper)" stroke="#0e1620" strokeWidth="2" />
-                        <circle cx="108" cy="436" r="4" fill="#0e1620" />
-                        <circle cx="136" cy="436" r="4" fill="#0e1620" />
-                        <line x1="140" y1="424" x2="162" y2="392" stroke="#0e1620" strokeWidth="3" />
-                      </g>
-                    )}
-                  </g>
-                  {/* warranty seal */}
-                  <g
-                    style={{
-                      transform: step === 6 ? "scale(1)" : "scale(0)",
-                      transformOrigin: "700px 150px",
-                      transition: "transform 900ms var(--ease-out-expo)",
-                    }}
-                  >
-                    <circle cx="700" cy="150" r="48" fill="var(--copper)" stroke="#0e1620" strokeWidth="2.5" />
-                    <circle cx="700" cy="150" r="39" fill="none" stroke="#0e1620" strokeWidth="1.2" strokeDasharray="3 3" />
-                    <text x="700" y="148" textAnchor="middle" fill="#0e1620" style={{ fontFamily: "var(--font-archivo)", fontWeight: 800, fontSize: 22 }}>
-                      25 YR
-                    </text>
-                    <text x="700" y="166" textAnchor="middle" fill="#0e1620" style={{ fontFamily: "var(--font-plex-mono)", fontSize: 9, letterSpacing: "0.14em" }}>
-                      WARRANTY
-                    </text>
-                  </g>
-                </HouseArt>
-              </div>
-
-              <HailCanvas active={step === 0} svgRef={svg} className="fx-desk pointer-events-none absolute inset-0 h-full w-full" />
+                  {s.phone && <source media="(max-width: 767px), (pointer: coarse)" type="image/avif" srcSet={`/images/3d/story/${s.id}-phone.avif`} />}
+                  {s.phone && <source media="(max-width: 767px), (pointer: coarse)" type="image/webp" srcSet={`/images/3d/story/${s.id}-phone.webp`} />}
+                  <source type="image/avif" srcSet={`/images/3d/story/${s.id}.avif`} />
+                  {/* stills rendered from the 3D scene below, pre-sized (next/image would only re-encode them) */}
+                  <img
+                    src={`/images/3d/story/${s.id}.webp`}
+                    alt={s.id === "s0" ? "A house in a hailstorm, the first step of a storm-damage roof replacement" : ""}
+                    aria-hidden={s.id !== "s0" || undefined}
+                    width={1100}
+                    height={1100}
+                    decoding="async"
+                    className="ph-stage-still h-full w-full object-cover"
+                  />
+                </picture>
+                ))}
+              <canvas
+                ref={canvas}
+                aria-hidden
+                className={clsx("ph-hide absolute inset-0 h-full w-full transition-opacity duration-[1.4s]", live ? "opacity-100" : "opacity-0")}
+              />
 
               {/* camera flash for the photo report */}
               <div aria-hidden className={clsx("pointer-events-none absolute inset-0 bg-white opacity-0", step === 1 && "[animation:flash_2.4s_linear_infinite]")} />
 
+              {/* warranty seal */}
+              <svg
+                aria-hidden
+                viewBox="0 0 100 100"
+                className="ph-stage-seal pointer-events-none absolute right-[7%] top-[22%] w-[clamp(4.5rem,9vw,7.5rem)]"
+                style={{
+                  transform: step === 6 ? "scale(1) rotate(0deg)" : "scale(0) rotate(-40deg)",
+                  transition: "transform 900ms var(--ease-out-expo)",
+                }}
+              >
+                <circle cx="50" cy="50" r="48" fill="var(--copper)" stroke="#0e1620" strokeWidth="2.5" />
+                <circle cx="50" cy="50" r="39" fill="none" stroke="#0e1620" strokeWidth="1.2" strokeDasharray="3 3" />
+                <text x="50" y="50" textAnchor="middle" fill="#0e1620" style={{ fontFamily: "var(--font-archivo)", fontWeight: 800, fontSize: 22 }}>
+                  25 YR
+                </text>
+                <text x="50" y="66" textAnchor="middle" fill="#0e1620" style={{ fontFamily: "var(--font-plex-mono)", fontSize: 9, letterSpacing: "0.14em" }}>
+                  WARRANTY
+                </text>
+              </svg>
+
               {/* HUD */}
-              <div className="ph-hide absolute inset-x-0 top-0 flex items-start justify-between p-4 md:p-6">
+              <div className="ph-hide pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between bg-gradient-to-b from-ink/55 to-transparent p-4 pb-10 md:p-6 md:pb-14">
                 <p className="font-display text-[clamp(2.4rem,5vw,4.8rem)] font-black leading-none tracking-[-0.05em] text-stone" aria-hidden>
                   0{step + 1}
                   <span className="text-stone/35">/07</span>
