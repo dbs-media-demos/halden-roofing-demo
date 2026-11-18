@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useBiz } from "@/components/preview/BizContext";
+import { prepLogo } from "@/lib/lead-logo";
 
 /**
  * The Halden mark: a single-line gable at a true 6/12 pitch whose walls and
@@ -41,6 +42,14 @@ export function Mark({ className, animated = false, title }: { className?: strin
 
 export function Logo({ className, compact = false }: { className?: string; compact?: boolean }) {
   const biz = useBiz();
+  // A preview with the lead's own logo: it replaces the mark and the name, in the header's colour
+  if (biz.logo)
+    return (
+      <span className={clsx("inline-flex items-center", className)}>
+        <span className="lead-logo lead-logo-head" dangerouslySetInnerHTML={{ __html: prepLogo(biz.logo.svg) }} />
+        <span className="sr-only">{biz.name}</span>
+      </span>
+    );
   return (
     <span className={clsx("inline-flex items-center gap-2.5", className)}>
       <Mark className="h-9 w-9" animated />

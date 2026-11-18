@@ -28,6 +28,10 @@ export type Biz = {
   rating: { value: number; count: number } | null;
   /** A personalised preview: other pages say "comes with the full site" */
   preview: boolean;
+  /** The business's own logo from the CRM (sanitised SVG: a `mark` and a `word` part); null = none */
+  logo: { svg: string } | null;
+  /** Towns / neighbourhoods they serve, their own town first ([] = only `area`) */
+  areas: string[];
 };
 
 export const telOf = (biz: Pick<Biz, "phone">) => (biz.phone ? `tel:${biz.phone}` : undefined);
@@ -129,6 +133,8 @@ export function bizFromCrm(b: Record<string, unknown> & { address: Biz["address"
     hoursSummary: s(b.hoursSummary),
     rating: (b.rating as Biz["rating"]) ?? null,
     preview: true,
+    logo: b.logo && typeof b.logo === "object" && typeof (b.logo as { svg?: unknown }).svg === "string" && (b.logo as { svg: string }).svg.includes("<svg") ? { svg: (b.logo as { svg: string }).svg } : null,
+    areas: Array.isArray(b.areas) ? (b.areas as unknown[]).map(s).map((a) => a.trim()).filter(Boolean).slice(0, 8) : [],
   };
 }
 

@@ -7,6 +7,7 @@ import { useHouseScene } from "@/lib/use-house-scene";
 import heroPhone from "@/assets/photos/hero-phone.jpg";
 import { useBiz } from "@/components/preview/BizContext";
 import { HeroCopy, heroAlt, useHeroScroll } from "@/components/sections/HeroCopy";
+import { useLoaderDone } from "@/lib/loader";
 
 /** Stills rendered from the 3D storm scene (public/images/3d): the desktop LCP image and fallback. */
 const STILL = (ext: string) => [1280, 1920, 2560].map((w) => `/images/3d/hero-storm-${w}.${ext} ${w}w`).join(", ");
@@ -63,6 +64,8 @@ export function Hero() {
   });
 
   useHeroScroll(root, win, (p) => scene.current?.setProgress(p));
+  // a preview's logo loader: the scene may warm up behind it, but only fades in once it has gone
+  const loaderDone = useLoaderDone();
 
   const alt = heroAlt(!!biz.preview);
   const {
@@ -94,7 +97,7 @@ export function Hero() {
           <canvas
             ref={canvas}
             aria-hidden
-            className={clsx("ph-hide absolute inset-0 h-full w-full transition-opacity duration-[1.4s]", live ? "opacity-100" : "opacity-0")}
+            className={clsx("ph-hide absolute inset-0 h-full w-full transition-opacity duration-[1.4s]", live && loaderDone ? "opacity-100" : "opacity-0")}
           />
           <div data-hero-dim className="absolute inset-0 bg-ink/30" />
           <div className="hero-shade absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink/80 to-transparent" />

@@ -8,6 +8,7 @@ import heroPhone from "@/assets/photos/hero-phone.jpg";
 import { useBiz } from "@/components/preview/BizContext";
 import { HeroCopy, heroAlt, useHeroScroll } from "@/components/sections/HeroCopy";
 import type { HailStorm } from "@/components/fx/hailStorm2d";
+import { whenLoaderDone } from "@/lib/loader";
 
 /** The storm scene's plate, rendered from the 3D house without its rain and hail (_src/stills). */
 const PLATE = (ext: string) => [1280, 1920, 2560].map((w) => `/images/3d/hero-plate-${w}.${ext} ${w}w`).join(", ");
@@ -60,7 +61,8 @@ export function HeroV2() {
       storm.current?.setPointer(x);
       if (stage.current) stage.current.style.translate = `${(-x * 10).toFixed(1)}px ${(-y * 6).toFixed(1)}px`;
     };
-    import("@/components/fx/hailStorm2d").then(({ startHailStorm }) => {
+    // a preview's logo loader first: the storm starts as it lifts off, not hidden behind it
+    const unwait = whenLoaderDone(() => import("@/components/fx/hailStorm2d").then(({ startHailStorm }) => {
       if (dead) return;
       // where the lightning lights the clouds this time
       if (sky.current) sky.current.style.setProperty("--fx", `${Math.round(20 + Math.random() * 60)}%`);
@@ -74,9 +76,10 @@ export function HeroV2() {
       });
       setLive(true);
       if (!prefersReducedMotion()) host.addEventListener("pointermove", onMove);
-    });
+    }));
     return () => {
       dead = true;
+      unwait();
       window.clearInterval(tick);
       host.removeEventListener("pointermove", onMove);
       storm.current?.stop();

@@ -9,6 +9,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // a second dev server (tests) builds into its own folder, never the running demo's .next
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   experimental: {
     // Keep the inlined display font and the site CSS as two parallel requests (the default merge

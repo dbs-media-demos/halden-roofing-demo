@@ -24,10 +24,14 @@ import type { Biz } from "@/lib/biz-core";
 
 const neighborhoods = cities.flatMap((c) => c.neighborhoods.slice(0, 3));
 
+/** A preview's own towns, repeated so the strip is never shorter than a wide screen. */
+const marqueeOf = (areas: string[]) => Array.from({ length: Math.ceil(12 / areas.length) }, () => areas).flat();
+
 /**
  * The homepage sections. The concept site renders them as they are; a personalised preview
  * (/for/<token>) passes a real business: its name, phone, hours, rating and a map of its address
- * replace Halden's, and the Fort Worth neighbourhood marquee and Tarrant County map step aside.
+ * replace Halden's, and the Fort Worth neighbourhood marquee and Tarrant County map step aside (the
+ * marquee shows the towns they serve instead, when the CRM knows them).
  * Phones show the same sections in the order a homeowner with a problem needs them (globals.css,
  * "phone pass"), plus the estimate form; desktop's order is this one.
  *
@@ -43,9 +47,9 @@ export function HomeContent({ biz = defaultBiz, hero = "3d", children }: { biz?:
       {hero === "3d" ? <Hero /> : <HeroV2 />}
       <Intro biz={biz} />
       <ServicesList />
-      {!biz.preview && (
+      {(!biz.preview || biz.areas.length > 0) && (
         <div data-marquee className="theme-ink border-y border-line py-7">
-          <Marquee items={neighborhoods} className="font-display text-[clamp(1.4rem,3vw,2.6rem)] font-extrabold uppercase tracking-[-0.03em] text-stone/85" />
+          <Marquee items={biz.preview ? marqueeOf(biz.areas) : neighborhoods} className="font-display text-[clamp(1.4rem,3vw,2.6rem)] font-extrabold uppercase tracking-[-0.03em] text-stone/85" />
         </div>
       )}
       <ProjectsRail />

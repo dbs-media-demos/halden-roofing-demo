@@ -41,12 +41,14 @@ export function ReviewCard({ r, className, area, shortName }: { r: Review; class
   );
 }
 
-function Row({ items, reverse, hidden, area, shortName }: { items: Review[]; reverse?: boolean; hidden?: boolean; area?: string; shortName?: string }) {
+type AreaOf = (i: number) => string | undefined;
+
+function Row({ items, reverse, hidden, areaOf, from = 0, shortName }: { items: Review[]; reverse?: boolean; hidden?: boolean; areaOf: AreaOf; from?: number; shortName?: string }) {
   return (
     <div className="marquee-wrap overflow-hidden" aria-hidden={hidden}>
       <div className={clsx("marquee flex w-max gap-5 pr-5", reverse && "marquee-rev")} style={{ "--dur": "80s" } as React.CSSProperties}>
         {[...items, ...items].map((r, i) => (
-          <ReviewCard key={i} r={r} area={area} shortName={shortName} className="w-[82vw] shrink-0 sm:w-[380px]" />
+          <ReviewCard key={i} r={r} area={areaOf(from + (i % items.length))} shortName={shortName} className="w-[82vw] shrink-0 sm:w-[380px]" />
         ))}
       </div>
     </div>
@@ -56,8 +58,8 @@ function Row({ items, reverse, hidden, area, shortName }: { items: Review[]; rev
 /** Google-style rating header + two drifting rows of review cards. */
 export function Reviews({ biz = defaultBiz }: { biz?: Biz }) {
   const half = Math.ceil(reviews.length / 2);
-  // Previews show the concept's sample reviews, placed in the business's area and labelled as samples
-  const area = biz.preview ? biz.area : undefined;
+  // Previews show the concept's sample reviews, placed in the towns they serve (or their own) and labelled as samples
+  const areaOf: AreaOf = (i) => (biz.preview ? (biz.areas.length ? biz.areas[i % biz.areas.length] : biz.area) : undefined);
   const shortName = biz.preview ? biz.shortName : undefined;
   return (
     <section aria-labelledby="reviews-title" className="theme-ink relative overflow-hidden pb-28 pt-24 md:pb-44 md:pt-36">
@@ -84,29 +86,29 @@ export function Reviews({ biz = defaultBiz }: { biz?: Biz }) {
 
       {/* Accessible list for screen readers; the marquees are decorative duplicates. */}
       <ul className="ph-hide sr-only">
-        {reviews.slice(0, 6).map((r) => (
+        {reviews.slice(0, 6).map((r, i) => (
           <li key={r.author}>
-            {r.author}, {area ?? r.city}: {shortName ? scrubReview(r.text, shortName) : r.text}
+            {r.author}, {areaOf(i) ?? r.city}: {shortName ? scrubReview(r.text, shortName) : r.text}
           </li>
         ))}
       </ul>
       {/* Phones: the first reviews in full, the rest a swipe away */}
       <div className="ph-only wrap mt-5 flex flex-col gap-2.5">
-        {reviews.slice(0, 3).map((r) => (
-          <ReviewCard key={r.author} r={r} area={area} shortName={shortName} />
+        {reviews.slice(0, 3).map((r, i) => (
+          <ReviewCard key={r.author} r={r} area={areaOf(i)} shortName={shortName} />
         ))}
       </div>
       <div className="ph-only wrap mt-2.5">
         <div data-rail className="ph-rail">
-          {reviews.slice(3).map((r) => (
-            <ReviewCard key={r.author} r={r} area={area} shortName={shortName} />
+          {reviews.slice(3).map((r, i) => (
+            <ReviewCard key={r.author} r={r} area={areaOf(3 + i)} shortName={shortName} />
           ))}
         </div>
       </div>
 
       <div className="ph-hide mt-16 flex flex-col gap-5" aria-hidden>
-        <Row items={reviews.slice(0, half)} area={area} shortName={shortName} hidden />
-        <Row items={reviews.slice(half)} area={area} shortName={shortName} reverse hidden />
+        <Row items={reviews.slice(0, half)} areaOf={areaOf} shortName={shortName} hidden />
+        <Row items={reviews.slice(half)} areaOf={areaOf} from={half} shortName={shortName} reverse hidden />
       </div>
 
       <div className="wrap relative z-[1] mt-12">

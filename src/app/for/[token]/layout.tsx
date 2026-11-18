@@ -4,6 +4,7 @@ import { BizProvider } from "@/components/preview/BizContext";
 import { PreviewGuard } from "@/components/preview/PreviewGuard";
 import { Translate } from "@/components/preview/Translate";
 import { SiteChrome } from "@/components/layout/SiteChrome";
+import { LeadLoader } from "@/components/preview/LeadLoader";
 import { previewBiz } from "@/lib/preview";
 import { sr } from "@/i18n/sr";
 import { enPreview } from "@/i18n/en-preview";
@@ -23,6 +24,8 @@ export default async function PreviewLayout({ children, params }: { children: Re
   return (
     <BizProvider biz={biz}>
       {Object.keys(dict).length > 0 && <Translate dict={dict} />}
+      {/* the lead's logo as a page loader (first view of this token in the tab) */}
+      {biz.logo && <LeadLoader svg={biz.logo.svg} token={token} />}
       <SiteChrome biz={biz}>{children}</SiteChrome>
       <PreviewGuard />
     </BizProvider>

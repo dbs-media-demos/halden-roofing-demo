@@ -4,7 +4,7 @@ import { OpenBadge } from "@/components/ui/OpenBadge";
 import { Drone } from "@/components/fx/Drone";
 import { DAY_NAMES, dayRange, weekFromMonday, type Biz } from "@/lib/biz-core";
 
-/** A preview's "where we are": the business's real address on a Google map, hours and directions. */
+/** A preview's "where we are": the business's real address on a Google map, the towns they serve, hours and directions. */
 export function PreviewMap({ biz }: { biz: Biz }) {
   const query = [biz.name, biz.address.full].filter(Boolean).join(", ");
   const embed = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=13&output=embed`;
@@ -19,6 +19,15 @@ export function PreviewMap({ biz }: { biz: Biz }) {
           </SplitReveal>
           <Reveal>
             {biz.address.full && <p className="mt-6 max-w-md text-muted">{biz.address.full}</p>}
+            {biz.areas.length > 0 && (
+              <ul aria-label="Towns we serve" className="mt-6 flex max-w-md flex-wrap gap-2">
+                {biz.areas.map((a) => (
+                  <li key={a} className="t-eyebrow rounded-full border border-line px-3.5 py-2 text-stone">
+                    {a}
+                  </li>
+                ))}
+              </ul>
+            )}
             <OpenBadge className="mt-6" />
             {biz.hours && (
               <dl className="mt-8 grid max-w-sm grid-cols-[auto_1fr] gap-x-8 gap-y-1.5 border-t border-line pt-6 text-sm">

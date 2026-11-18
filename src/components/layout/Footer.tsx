@@ -7,6 +7,7 @@ import { site, mailHref, agencyName, agencyUrl } from "@/lib/site";
 import { defaultBiz } from "@/lib/biz";
 import { DAY_NAMES, dayRange, telOf, weekFromMonday, type Biz } from "@/lib/biz-core";
 import { FooterWordmark } from "./FooterWordmark";
+import { prepLogo } from "@/lib/lead-logo";
 
 const company = [
   { href: "/about", label: "About the Haldens" },
@@ -24,7 +25,11 @@ export function Footer({ biz = defaultBiz }: { biz?: Biz }) {
       <div className="wrap">
         <div className="ph-foot grid gap-12 md:grid-cols-12">
           <div className="ph-foot-brand md:col-span-4">
-            <Mark className="h-14 w-14" />
+            {biz.logo ? (
+              <span className="lead-logo lead-logo-foot" role="img" aria-label={biz.name} dangerouslySetInnerHTML={{ __html: prepLogo(biz.logo.svg) }} />
+            ) : (
+              <Mark className="h-14 w-14" />
+            )}
             <p className="t-h3 mt-6 max-w-sm">Built for the next storm. Here for the one after that.</p>
             <div className="mt-8 flex flex-col gap-2 text-[0.98rem]">
               <a href={telOf(biz)} className="font-display text-2xl font-bold tracking-[-0.02em] hover:text-copper-2">
@@ -55,8 +60,8 @@ export function Footer({ biz = defaultBiz }: { biz?: Biz }) {
           <nav aria-label="Service areas" className="md:col-span-2">
             <p className="t-eyebrow text-faint">Service areas</p>
             <ul className="mt-5 flex flex-col gap-2.5">
-              {(biz.preview ? [{ slug: "", name: biz.area }] : cities).map((c) => (
-                <li key={c.slug}>
+              {(biz.preview ? (biz.areas.length ? biz.areas : [biz.area]).map((name) => ({ slug: "", name })) : cities).map((c) => (
+                <li key={c.name}>
                   <Link href={`/service-areas/${c.slug}`} className="text-muted transition-colors hover:text-stone">
                     {c.name}
                   </Link>

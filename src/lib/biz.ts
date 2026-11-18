@@ -21,4 +21,6 @@ export const defaultBiz: Biz = {
   hoursSummary: "Mon – Fri 7 am – 6 pm",
   rating: { ...site.rating },
   preview: false,
+  logo: null,
+  areas: [],
 };
