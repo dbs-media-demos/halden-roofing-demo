@@ -33,16 +33,28 @@ export function Header({ services }: { services: ServiceNavItem[] }) {
   const [megaOpen, setMegaOpen] = useState(false);
   const [bannerDismissed, dismissBanner] = useDismissed(BANNER_KEY);
   const [prevPath, setPrevPath] = useState(pathname);
-  const lastY = useRef(0);
+  // scrollY when the header last hid or showed, or the furthest point since in that direction
+  const anchor = useRef(0);
+  const hid = useRef(false);
   const megaTimer = useRef<number>(undefined);
 
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
       setScrolled(y > 40);
-      setHidden(y > 420 && y > lastY.current + 4);
-      if (y < lastY.current - 4 || y < 420) setHidden(false);
-      lastY.current = y;
+      // Hides or shows only after a clear 12 px in one direction since it last changed (or since the
+      // turn): Lenis eases a scroll out in steps of a pixel or less, and comparing each step with the
+      // one before flashed the header in and out over and over.
+      const dy = y - anchor.current;
+      if (y < 420) {
+        hid.current = false;
+        anchor.current = y;
+      } else if (hid.current ? dy > 0 : dy < 0) anchor.current = y; // still going the same way: follow it to the turn
+      else if (Math.abs(dy) > 12) {
+        hid.current = dy > 0;
+        anchor.current = y;
+      }
+      setHidden(hid.current);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

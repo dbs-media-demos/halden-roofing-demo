@@ -79,10 +79,10 @@ export function useHouseScene({ mode, canvas, host, init, onFlash, attach, holdQ
             ...cb.current.init?.(),
             pause: yieldIdle,
             onFlash: (f) => cb.current.onFlash?.(f),
-            onSlow: (fps, worst, work) => mark3DOff(`${mode}: ${Math.round(fps)} fps, worst frame ${Math.round(worst)} ms, ${work.toFixed(1)} ms work`),
+            onSlow: (fps, worst, work) => mark3DOff(`${mode}: ${Math.round(fps)} fps, worst frame ${Math.round(worst)} ms, ${work.toFixed(1)} ms work`, "slow"),
           });
         } catch (e) {
-          if (e instanceof NoGpuError) mark3DOff(e.message);
+          if (e instanceof NoGpuError) mark3DOff(e.message, "gpu");
           return; // the still stays
         }
         if (disposed || !can3D()) return h.dispose(); // gone, or another scene found this computer too slow meanwhile

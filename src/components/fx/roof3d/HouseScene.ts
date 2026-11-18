@@ -23,8 +23,8 @@ import { rng } from "./geometry";
  * Never stutters on the way in: `createHouseScene` builds in idle-time steps, refuses software
  * rendering, compiles every shader (`compileAsync`) and draws one frame while the canvas is still
  * hidden, and only then resolves, so the still can hand over. The first two seconds on screen are
- * timed: under ~45 fps, a frame over 100 ms, or more than 8 ms of work per frame, and the scene
- * stops and calls `onSlow`.
+ * timed (after its first 5 frames): under ~45 fps, a 3rd frame over 100 ms or one over 400 ms, or
+ * more than 8 ms of work per frame, and the scene stops and calls `onSlow`.
  */
 
 export type Weather = "storm" | "overcast" | "clear" | "golden";
@@ -66,7 +66,13 @@ export class NoGpuError extends Error {}
 
 const PROBE_MS = 2000;
 const PROBE_FPS = 45;
+/** A hitch or two (a font, an image decode, another tab) isn't a slow computer: the 3rd one is, or one over 4x this. */
 const PROBE_WORST = 100;
+/**
+ * Frames not timed: the first ones after a scene appears pay one-off costs (the GPU's first real
+ * draw). On 18 Nov a refresh's first frame took 371 ms on a PC that then ran 112 fps.
+ */
+const PROBE_GRACE = 5;
 /**
  * Average ms of the scene's own work per frame (simulation + draw calls). Over half a 60 fps frame
  * leaves no room for scrolling on a 60 Hz laptop, even when a fast screen still reports 45+ fps.
@@ -485,32 +491,34 @@ export async function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): P
   let disposed = false;
   let stopped = false; // too slow: the loop never runs again
 
-  // The first two seconds on screen are timed (after three warm-up frames). The loop keeps
+  // The first two seconds on screen are timed (after the grace frames). The loop keeps
   // drawing while they are, so even a calm scene gets measured.
-  const probe = { on: true, n: 0, prev: 0, t0: 0, frames: 0, worst: 0, work: 0 };
+  const probe = { on: true, n: 0, prev: 0, t0: 0, frames: 0, worst: 0, work: 0, hitches: 0 };
   let settleProbe: (smooth: boolean) => void = () => {};
   const probed = new Promise<boolean>((r) => (settleProbe = r));
-  const resetProbe = () => Object.assign(probe, { n: 0, prev: 0, t0: 0, frames: 0, worst: 0, work: 0 });
+  const resetProbe = () => Object.assign(probe, { n: 0, prev: 0, t0: 0, frames: 0, worst: 0, work: 0, hitches: 0 });
   const watch = (now: number, work: number) => {
     if (!probe.on) return false;
     if (probe.prev) {
       const gap = now - probe.prev;
       probe.n++;
-      if (probe.n === 3) probe.t0 = now;
-      else if (probe.n > 3) {
+      if (probe.n === PROBE_GRACE) probe.t0 = now;
+      else if (probe.n > PROBE_GRACE) {
         probe.frames++;
         probe.worst = Math.max(probe.worst, gap);
         probe.work += work;
+        if (gap > PROBE_WORST) probe.hitches++;
       }
     }
     probe.prev = now;
     const span = probe.t0 ? now - probe.t0 : 0;
     const fps = span ? (probe.frames * 1000) / span : 60;
-    if (probe.worst > PROBE_WORST || span >= PROBE_MS) {
+    const hitched = probe.hitches >= 3 || probe.worst > PROBE_WORST * 4;
+    if (hitched || span >= PROBE_MS) {
       probe.on = false;
       const work = probe.work / Math.max(1, probe.frames);
-      const smooth = fps >= PROBE_FPS && probe.worst <= PROBE_WORST && work <= PROBE_WORK;
-      performance.mark(`3d:${mode}:probe`, { detail: { fps: Math.round(fps), worst: Math.round(probe.worst), work: +work.toFixed(2), smooth } });
+      const smooth = fps >= PROBE_FPS && !hitched && work <= PROBE_WORK;
+      performance.mark(`3d:${mode}:probe`, { detail: { fps: Math.round(fps), worst: Math.round(probe.worst), hitches: probe.hitches, work: +work.toFixed(2), smooth } });
       settleProbe(smooth);
       if (!smooth) {
         stopped = true;
