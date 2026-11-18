@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useContext, useEffect, useRef, useState, type RefObject } from "react";
 import { isPhone } from "@/lib/gsap";
+import { No3DContext } from "@/lib/no-3d";
 import { after3DGate, can3D, mark3DOff, on3DOff, warm3D, yieldIdle } from "@/lib/three-gate";
 import type { HouseScene, Mode } from "@/components/fx/roof3d/HouseScene";
 import type { MaterialId } from "@/content/materials";
@@ -32,13 +33,15 @@ const FADE_MS = 1500;
 export function useHouseScene({ mode, canvas, host, init, onFlash, attach, holdQueue }: Setup) {
   const scene = useRef<HouseScene | null>(null);
   const [live, setLive] = useState(false);
+  // /v2 (the homepage without 3D): every scene stays on its still and three.js is never fetched
+  const off = useContext(No3DContext);
   const cb = useRef({ init, onFlash, attach });
   useEffect(() => {
     cb.current = { init, onFlash, attach };
   });
 
   useEffect(() => {
-    if (isPhone()) return;
+    if (off || isPhone()) return;
     let house: HouseScene | null = null;
     let disposed = false;
     let detach = () => {};
@@ -110,7 +113,7 @@ export function useHouseScene({ mode, canvas, host, init, onFlash, attach, holdQ
       house?.dispose();
       leaving?.dispose();
     };
-  }, [mode, canvas, host, holdQueue]);
+  }, [off, mode, canvas, host, holdQueue]);
 
   return { scene, live };
 }

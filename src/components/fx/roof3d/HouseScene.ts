@@ -57,6 +57,8 @@ type Opts = {
   onSlow?: (fps: number, worst: number, work: number) => void;
   /** Called between the heavy build steps (idle time); a stand-in for tests and stills. */
   pause?: () => Promise<void>;
+  /** Stills tool only: the storm without rain or hail (the /v2 hero draws its own in 2D over it). */
+  dry?: boolean;
 };
 
 /** Thrown when the computer has no real GPU (software rendering or a major performance caveat). */
@@ -318,9 +320,9 @@ export async function createHouseScene(canvas: HTMLCanvasElement, opts: Opts): P
   await pause();
 
   const rain = mode === "explorer" ? null : buildRain();
-  if (rain) scene.add(rain.mesh);
+  if (rain && !opts.dry) scene.add(rain.mesh);
   const hail = mode === "explorer" ? null : buildHail(mode === "hero" ? 1800 : 1400);
-  if (hail) scene.add(hail.mesh);
+  if (hail && !opts.dry) scene.add(hail.mesh);
   const lightning = buildLightning(mode === "hero" ? 1.6 : 0.8);
   // the explorer's other roofs use shader variants of their own: compile them now, not on the first click
   const variants = studio ? warmCoverings(grain) : null;

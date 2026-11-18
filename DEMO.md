@@ -26,6 +26,7 @@
   - Local production build, measured 2026-09-28. Observed LCP ≈ 0.3–0.5 s.
 
 - 3D pass (2026-11-09), production build: phones load 192 KB gz of JS and zero bytes of three.js (stills instead; three.js only loads on a desktop with a mouse after load, ~158 KB gz). Phone at 375 px, 4x CPU, slow 4G: LCP 2.0 s, TBT 110–150 ms, CLS 0. Lighthouse mobile 90 (simulated LCP 3.7 s, same as before the pass), desktop 99. `next.config.ts` keeps the inlined display font and the site CSS as two parallel stylesheets (cssChunking graph, requestCost 0).
+- /v2 (2026-11-18): the same homepage without 3D, also at /for/<token>/v2. The hero is the same house and gable window with the hailstorm drawn in canvas 2D over a plate rendered from the 3D scene (hail strikes the roof planes and bounces off the eaves, lightning, wind on the pointer, the storm passes on scroll, a hit counter), the storm story and explorer keep their stills. Zero three.js and no WebGL at any width; 82 fps at 4x CPU on desktop. Phone at 375 px, 4x CPU, slow 4G: 187 KB gz JS, LCP 1.9-2.0 s, TBT 125-140 ms, CLS 0 (same as /).
 - Phone pass (2026-11-07): see README "Phones". Section order on phones: hero, proof, project photos, reviews, how the estimate works, form, FAQ, then services, storm chaser, materials, warranty, map, CTA.
 
 ## Portfolio copy

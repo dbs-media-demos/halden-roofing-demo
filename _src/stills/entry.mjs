@@ -8,6 +8,7 @@ canvas.style.height = "800px";
 createHouseScene(canvas, {
   mode: q.get("mode") || "hero",
   step: +(q.get("step") || 0),
+  dry: q.has("dry"),
   roof: q.get("kind") ? { kind: q.get("kind"), hex: "#" + q.get("hex") } : undefined,
 }).then((scene) => {
   window.__scene = scene;

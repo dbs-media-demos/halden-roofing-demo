@@ -364,6 +364,57 @@ html.lenis body {
   filter: brightness(calc(1 + var(--flash) * 0.55));
 }
 
+/* /v2 hero (no 3D): the storm is drawn in 2D over a plate of the same house (HeroV2). The stage
+   overscans a little so the pointer can shift it; the scroll pushes in on the roof. */
+.hero2-stage {
+  transform-origin: 58% 52%;
+  will-change: scale, translate;
+  transition: translate 0.9s var(--ease-out-expo);
+}
+/* lightning behind the clouds: a cold bloom high in the sky (where: --fx, how bright: opacity) */
+.hero2-sky {
+  --fx: 40%;
+  background:
+    radial-gradient(60% 55% at var(--fx) 8%, rgb(214 228 255 / 0.95), rgb(150 175 215 / 0.35) 45%, transparent 75%),
+    linear-gradient(to bottom, rgb(190 208 240 / 0.35), transparent 62%);
+  mix-blend-mode: screen;
+}
+/* after the storm: low warm light from the west, over the sky and the stone */
+.hero2-warm {
+  background:
+    radial-gradient(80% 70% at 88% 60%, rgb(235 165 108 / 0.55), transparent 70%),
+    linear-gradient(to top, rgb(196 113 60 / 0.25), rgb(51 71 106 / 0.2));
+  mix-blend-mode: soft-light;
+}
+.hero2-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--copper-2);
+  box-shadow: 0 0 0 0 rgb(217 138 82 / 0.6);
+  animation: hero2-dot 1.8s ease-out infinite;
+}
+@keyframes hero2-dot {
+  0% {
+    box-shadow: 0 0 0 0 rgb(217 138 82 / 0.6);
+  }
+  80%,
+  100% {
+    box-shadow: 0 0 0 0.5rem rgb(217 138 82 / 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero2-dot {
+    animation: none;
+  }
+}
+@media (max-width: 767px), (pointer: coarse) {
+  .hero2-stage {
+    inset: 0;
+    will-change: auto;
+  }
+}
+
 /* Material explorer: the model sits in a soft studio; a new roof's still wipes in eave → ridge. */
 .mat-studio {
   background:

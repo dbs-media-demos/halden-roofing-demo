@@ -22,6 +22,10 @@ Below 768 px or on a touch screen the homepage is a different cut of the same co
 
 The hero storm, the storm-damage story and the material explorer are one three.js scene (`src/components/fx/roof3d`, house and roofs built from primitives, textures painted on canvases, no model files). Nothing imports it statically: `src/lib/three-gate.ts` runs `import()` only after load on a big screen with a mouse, without reduced motion or Save-Data, so phones download zero bytes of three.js. Phones and other non-3D screens get stills rendered from the same scene (`public/images/3d`); after changing the scene, regenerate them with `_src/stills/render.mjs`.
 
+## Two homepages: `/` and `/v2`
+
+`/` is the full homepage with the 3D storm. `/v2` (and `/for/<token>/v2` for a personalised preview) is the same page without any 3D, for a slow laptop or a lead who doesn't want it: zero bytes of three.js at any width. One component tree (`HomeContent`, `hero="3d" | "2d"`), so every change to the sections lands in both. The `/v2` hero (`HeroV2`, `fx/hailStorm2d.ts`) draws the hailstorm in canvas 2D over a plate rendered from the 3D scene without its weather (`public/images/3d/hero-plate-*`, `_src/stills/render.mjs hero-plate`): hail strikes the real roof planes and bounces off the eaves, lightning lights the sky and the headline, the pointer turns the wind, and the scroll passes the storm. Further down, `lib/no-3d` keeps the storm story and the material explorer on their stills. Phones get the same page on both.
+
 ## Where things live
 
 - `src/content/*` — all copy: services, projects, cities, reviews, FAQs, materials, company facts

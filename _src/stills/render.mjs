@@ -27,6 +27,8 @@ const swatches = {
 };
 const jobs = [
   { name: "hero-storm", q: "mode=hero", w: 2560, h: 1440, warm: 6, sizes: [2560, 1920, 1280], avif: 48, webp: 70 },
+  // the /v2 hero's plate: the same storm without rain or hail (drawn live in 2D over it)
+  { name: "hero-plate", q: "mode=hero&dry", w: 2560, h: 1440, warm: 6, sizes: [2560, 1920, 1280], avif: 48, webp: 70 },
   ...[0, 1, 4, 6].map((s) => ({ name: `story/s${s}`, q: `mode=story&step=${s}`, w: 1100, h: 1100, warm: 5, avif: 50, webp: 72 })),
   ...[0, 6].map((s) => ({ name: `story/s${s}-phone`, q: `mode=story&step=${s}`, w: 1000, h: 500, zoom: 1.55, warm: 5, avif: 52, webp: 74 })),
   ...Object.entries(swatches).flatMap(([k, hs]) =>
