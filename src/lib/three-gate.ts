@@ -58,6 +58,7 @@ function loadBlocked() {
 export function after3DGate(yes: () => void, no?: () => void) {
   let cancelled = false;
   let idle = 0;
+  let timer = 0;
   const run = () => {
     if (cancelled) return;
     if (!can3D()) return no?.();
@@ -69,15 +70,17 @@ export function after3DGate(yes: () => void, no?: () => void) {
   };
   const onLoad = () => {
     if (typeof window.requestIdleCallback === "function") idle = window.requestIdleCallback(run, { timeout: 600 });
-    else idle = window.setTimeout(run, 120);
+    else timer = window.setTimeout(run, 120);
   };
   if (document.readyState === "complete") onLoad();
   else window.addEventListener("load", onLoad, { once: true });
   return () => {
     cancelled = true;
     window.removeEventListener("load", onLoad);
-    if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle);
-    window.clearTimeout(idle);
+    // each id goes back to the API that made it: idle and timer ids share small numbers, so
+    // clearTimeout(idleId) could cancel some other timer on the page
+    if (idle) window.cancelIdleCallback(idle);
+    window.clearTimeout(timer);
   };
 }
 

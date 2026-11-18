@@ -48,10 +48,9 @@ export function useIdleGSAP(setup: () => void | (() => void), scope: React.RefOb
     if (isPhone()) return;
     let dead = false;
     let idle: number | undefined;
+    let timer: number | undefined;
     let cleanup: void | (() => void);
     let ctx: { revert: () => void } | undefined;
-    const ric = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 250));
-    const cancel = window.cancelIdleCallback ?? window.clearTimeout;
     const run = () => {
       ctx = gsap.context(() => {
         cleanup = setup();
@@ -60,11 +59,14 @@ export function useIdleGSAP(setup: () => void | (() => void), scope: React.RefOb
     loadGsap().then(() => {
       if (dead) return;
       if (immediate) run();
-      else idle = ric(run, { timeout: 1200 });
+      else if (typeof window.requestIdleCallback === "function") idle = window.requestIdleCallback(run, { timeout: 1200 });
+      else timer = window.setTimeout(run, 250);
     });
     return () => {
       dead = true;
-      if (idle !== undefined) cancel(idle);
+      // each id goes back to the API that made it (idle and timer ids share small numbers)
+      if (idle !== undefined) window.cancelIdleCallback(idle);
+      window.clearTimeout(timer);
       cleanup?.();
       ctx?.revert();
     };
